@@ -32,89 +32,60 @@ const specHotspots: Record<string, HotspotSpec> = {
     title: "Vehicle Dimensions & Weights",
     accent: "text-amber-400 border-amber-400/30",
     stats: [
-      { label: "Overall Dimensions (L × W × H)", val: "2137.76 mm × 859.66 mm × 1390.55 mm (84.16″ × 33.85″ × 54.74″)" },
-      { label: "Wheelbase", val: "1366.85 mm (53.81 in)" },
-      { label: "Track Width (Front / Rear)", val: "Front: 1516 mm (59.69 in) | Rear: 1507 mm (59.33 in)" },
-      { label: "Curb Weight (Full of Fluids)", val: "200.2 kg" },
-      { label: "Weight with 75 kg Driver", val: "270.0 kg (Front: 160.79 kg | Rear: 114.41 kg)" },
-      { label: "Weight Bias (Front : Rear)", val: "58.43% Front : 42.57% Rear" },
-      { label: "Ground Clearance", val: "350 mm (13.78 in)" },
-      { label: "Center of Gravity Height", val: "568.24 mm (22.37 in)" }
+      { label: "Dimensions (L × W × H)", val: "2138 × 860 × 1391 mm (84.2″ × 33.9″ × 54.7″)" },
+      { label: "Wheelbase & Track", val: "1366.85 mm WB · 1516 mm Front / 1507 mm Rear Track" },
+      { label: "Curb Weight", val: "200.2 kg (270.0 kg with 75 kg driver)" },
+      { label: "Ground Clearance", val: "350 mm (13.78 in)" }
     ]
   },
   chassis: {
     title: "Chassis & Roll Cage",
     accent: "text-apex-red border-apex-red/30",
     stats: [
-      { label: "Frame Construction & Material", val: "AISI 4130 Chromoly Steel Spaceframe" },
+      { label: "Frame Material", val: "AISI 4130 Chromoly Steel Spaceframe" },
       { label: "Joining Method", val: "Arc Welding" },
       { label: "Bare Frame Weight", val: "~78 kg (with brackets & paint)" },
-      { label: "Torsional Stiffness", val: "347.44 N·m/deg (256.27 lb-ft/deg)" },
-      { label: "Validation Method", val: "CAE Torsional Rigidity in ANSYS (2400 N at FLC members)" },
-      { label: "Cockpit Ergonomics", val: "Fixed seat and steering wheel" },
-      { label: "Seat & Padding", val: "FRP bucket with 30mm PP seat foam & 20mm head support" }
+      { label: "Torsional Stiffness", val: "347.44 N·m/deg (ANSYS FEA validated)" }
     ]
   },
   powertrain: {
-    title: "mBAJA Powertrain & 4WD Driveline",
+    title: "mBAJA Powertrain & 4WD",
     accent: "text-torque-orange border-torque-orange/30",
     stats: [
-      { label: "Transmission Type", val: "JIT CVT with Custom 9:1 Gearbox" },
-      { label: "Top Speed (Power / Ratio Limited)", val: "75.18 km/h (Power-limited) | 83.50 km/h (Ratio-limited)" },
-      { label: "CVT Ratio Range", val: "3.90 : 1 (Starting) to 0.50 : 1 (Final Overdrive)" },
-      { label: "Maximum Tractive Effort", val: "1657 N" },
-      { label: "Acceleration (100 ft / 150 ft)", val: "100 ft in 3.25 s | 150 ft in 4.32 s" },
-      { label: "Maximum Gradeability", val: "55.5% max grade capability" },
-      { label: "Clutch Transmissible Torque", val: "83.1 N·m (Spring Constant: 14.25 Nm/rad)" },
-      { label: "Gearbox Transmissible Torque", val: "747.9 N·m" },
-      { label: "4WD Center Differential", val: "Single-Speed Transfer Case (Direct Drive, 35% Front / 65% Rear split)" },
-      { label: "Half Shafts & Joints", val: "Front: 599 mm | Rear: 617 mm (Tripod CV Joints, 95% efficiency)" },
-      { label: "Propeller Shaft", val: "1100 mm Tubular Shaft with Universal Joint (10° angle)" }
+      { label: "Transmission", val: "JIT CVT with Custom 9:1 Gearbox" },
+      { label: "Theoretical Top Speed", val: "75.18 km/h (Power-limited) · 83.50 km/h (Ratio-limited)" },
+      { label: "Max Tractive Effort", val: "1657 N (55.5% gradeability)" },
+      { label: "4WD Driveline", val: "Single-Speed Transfer Case (35% Front / 65% Rear split)" }
     ]
   },
   suspension: {
-    title: "Suspension & Kinematics",
+    title: "Suspension & Tyres",
     accent: "text-lift-blue border-lift-blue/30",
     stats: [
-      { label: "Suspension Architecture", val: "Front: Double Wishbone A-arm | Rear: Double Wishbone H-arm" },
-      { label: "Tyre Size & Wheels", val: "23×7-10 Tubeless on 7 in wide / 10 in rims" },
-      { label: "Vertical Wheel Travel", val: "Front: 160 mm (6.30 in) | Rear: 160 mm (6.30 in)" },
-      { label: "Spring Rate", val: "Front: 41.5 N/mm (237 lbs/in) | Rear: 41.5 N/mm (237 lbs/in)" },
-      { label: "Wheel Rate (Chassis to Wheel)", val: "Front: 3080.50 N/mm | Rear: 8693.54 N/mm" },
-      { label: "Damping Configuration", val: "N2 gas-assisted, revalvable (Push/Pull: 400 Ns/m)" },
-      { label: "Motion Ratio", val: "Front: 1.743 (progressive) | Rear: 2.585 (progressive)" },
-      { label: "Roll Rate & Frequency", val: "Roll Rate: 0.13 deg/g | Sprung Freq: 4.28 Hz Front, 2.34 Hz Rear" },
-      { label: "Static Camber & Caster", val: "Camber: Front -1.00°, Rear 0.00° | Caster: Front 4.49°, Rear -0.36°" },
-      { label: "Static Kingpin & Scrub Radius", val: "Kingpin: 6.35° Front / 13.16° Rear | Scrub: 15.78 mm Front, -26.42 mm Rear" }
+      { label: "Architecture", val: "Double Wishbone (A-arm front, H-arm rear)" },
+      { label: "Wheel Travel", val: "160 mm (6.30 in) Front & Rear" },
+      { label: "Tyres & Wheels", val: "23×7-10 Tubeless on 10″ rims" },
+      { label: "Spring Rate & Dampers", val: "41.5 N/mm spring · N2 gas-assisted revalvable dampers" }
     ]
   },
   steering: {
     title: "Steering Subsystem",
     accent: "text-cyan-400 border-cyan-400/30",
     stats: [
-      { label: "Steering Mechanism", val: "Custom Rack & Pinion (Rack Mass: 1.439 kg)" },
-      { label: "Steering Geometry", val: "Ackermann Geometry (84.96% Ackermann)" },
-      { label: "Steering Ratio", val: "4.5 : 1 characteristic ratio" },
-      { label: "Turning Circle Diameter", val: "3.80 meters" },
-      { label: "Wheel Lock-to-Lock Angle", val: "8.13 rad (~466° total rotation)" },
-      { label: "Max Steer Angles", val: "Inner: 46.00° | Outer: 29.05°" },
-      { label: "Max Rack Travel", val: "42.45 mm (0.04245 m)" },
-      { label: "Steering Wheel & Column", val: "11.06 in (281 mm) wheel · U-joint collapsible column (≤35°)" }
+      { label: "Mechanism", val: "Custom Rack & Pinion (4.5 : 1 ratio)" },
+      { label: "Turning Circle", val: "3.80 meters diameter" },
+      { label: "Steering Geometry", val: "Ackermann Geometry (84.96%)" },
+      { label: "Lock-to-Lock Angle", val: "8.13 rad (~466°)" }
     ]
   },
   brakes: {
-    title: "Braking & Uprights",
+    title: "Braking System",
     accent: "text-emerald-400 border-emerald-400/30",
     stats: [
-      { label: "Front Rotors", val: "Inboard Fixed SS410 Stainless Steel (180 mm dia. × 4.0 mm)" },
-      { label: "Rear Rotors", val: "Outboard Fixed SS410 Stainless Steel (180 mm dia. × 4.0 mm)" },
-      { label: "Master Cylinder", val: "Bosch Tandem Master Cylinder (19 mm bore dia.)" },
-      { label: "Calipers", val: "Wilwood PS-1, 1.12 in (28.4 mm) dia. pistons, fixed (P/N 120-8373)" },
-      { label: "Upright Assembly", val: "VMC Al-7075 T6 with integral caliper mounts (63.5 mm spacing)" },
-      { label: "Axle Specifications", val: "Front: 30 mm fixed spindle EN19 (4140) | Rear: 25.4 mm half-shaft EN24 (4340)" },
-      { label: "Pedal Ratio & Force", val: "6 : 1 pedal ratio · 366 N pedal effort · 77.4 bar pMC actuation" },
-      { label: "Stopping Performance", val: "Stopping distance: 7.87 m in 1.42 s (Deceleration: 7.848 m/s² / ~0.8g)" },
-      { label: "Parking Brake", val: "135 N·m mechanical parkbrake torque at rear wheels" }
+      { label: "Rotors", val: "180 mm SS410 (Inboard Front / Outboard Rear)" },
+      { label: "Master Cylinder & Calipers", val: "Wilwood PS-1 calipers · Bosch Tandem MC (19 mm)" },
+      { label: "Stopping Performance", val: "7.87 m in 1.42 s (7.848 m/s² deceleration / ~0.8g)" },
+      { label: "Pedal Ratio", val: "6 : 1 ratio (366 N pedal effort)" }
     ]
   }
 };
