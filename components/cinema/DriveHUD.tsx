@@ -9,7 +9,7 @@ import { Volume2, VolumeX } from "lucide-react";
 import { engine } from "./engine";
 
 const IDLE = 1400, REDLINE = 3800;
-const GEARS = [0, 9, 18, 28, 40, 56]; // km/h where each gear starts (1…5)
+const GEARS = [0, 14, 28, 44, 60, 75]; // km/h where each gear starts (1…5)
 const SEGMENTS = 14;
 
 export default function DriveHUD({ hide = false }: { hide?: boolean }) {

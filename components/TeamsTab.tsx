@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail, Award } from 'lucide-react';
+import { Mail, Award, Search, ShieldCheck, UserCheck } from 'lucide-react';
 import {
   facultyAdvisors, officeBearers, bajaTeam, TeamMember
 } from '@/data/teamData';
+import { saeChapterMembers } from '@/data/saeMembers';
 import Image from 'next/image';
 import { PageHero, SectionHead, Segmented, SpotCard, Reveal, Label } from './cinema/PageKit';
 import { engine } from './cinema/engine';
@@ -17,9 +18,9 @@ const Linkedin = ({ size = 24, ...props }: React.ComponentPropsWithoutRef<'svg'>
   </svg>
 );
 
-type Segment = "baja" | "officers" | "alumni";
+type Segment = "officers" | "baja" | "chapter" | "alumni";
 type BajaFilter = "all" | "leads" | "powertrain" | "suspension" | "chassis" | "brakes" | "steering" | "management";
-type OfficerFilter = "all" | "executive" | "chairs" | "faculty";
+type OfficerFilter = "all" | "faculty" | "executive" | "chairs";
 
 /** One rung of the org chart. */
 function OrgNode({ label, names, note, hot = false }: { label: string; names: React.ReactNode; note: string; hot?: boolean }) {
@@ -28,7 +29,7 @@ function OrgNode({ label, names, note, hot = false }: { label: string; names: Re
       hot ? "bg-apex-red/[0.1] border-apex-red/45 shadow-[0_20px_60px_-25px_rgba(225,6,0,0.8)]" : "bg-white/[0.035] border-white/10"
     }`}>
       <Label className={hot ? "text-[#FF5A3C]" : ""}>{label}</Label>
-      <p className="mt-2 font-display font-semibold text-bone text-lg tracking-[-0.025em] leading-snug">{names}</p>
+      <div className="mt-2 font-display font-semibold text-bone text-lg tracking-[-0.025em] leading-snug">{names}</div>
       <p className="mt-1 text-bone/45 text-[13px]">{note}</p>
     </div>
   );
@@ -80,9 +81,11 @@ function MemberCard({ m, i }: { m: TeamMember; i: number }) {
 }
 
 export default function TeamsTab() {
-  const [activeSegment, setActiveSegment] = useState<Segment>("baja");
+  // Order: Office Bearers first, then BAJA, then Chapter Members, then Alumni
+  const [activeSegment, setActiveSegment] = useState<Segment>("officers");
   const [bajaFilter, setBajaFilter] = useState<BajaFilter>("all");
   const [officerFilter, setOfficerFilter] = useState<OfficerFilter>("all");
+  const [memberSearch, setMemberSearch] = useState<string>("");
 
   const getFilteredBaja = () => {
     switch (bajaFilter) {
@@ -99,154 +102,198 @@ export default function TeamsTab() {
 
   const getFilteredOfficers = () => {
     switch (officerFilter) {
+      case "faculty": return facultyAdvisors;
       case "executive": return officeBearers.filter(m => m.subteam === "Executive Council");
       case "chairs": return officeBearers.filter(m => m.subteam === "Chapter Chairs");
-      case "faculty": return facultyAdvisors;
       default: return [...facultyAdvisors, ...officeBearers];
     }
   };
 
+  const filteredMembers = saeChapterMembers.filter((m) => {
+    const q = memberSearch.toLowerCase();
+    return (
+      m.name.toLowerCase().includes(q) ||
+      m.degree.toLowerCase().includes(q) ||
+      m.graduationYear.includes(q) ||
+      m.email.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="animate-fadeIn">
       <PageHero
-        kicker="Teams · The crew"
-        title="The people behind the *cage.*"
-        sub="The engineers, drivers, and leaders who design, fabricate, and test the B-26 all-terrain vehicle for BAJA SAEINDIA."
-        ghost="B26"
+        kicker="Teams · The Chapter & Squad"
+        title="The minds driving the *mission.*"
+        sub="The faculty advisors, chapter office bearers, and the 34-member engineering crew building the B-26 all-terrain buggy for BAJA SAEINDIA."
+        ghost="CREW"
         stats={[
-          { value: "34", label: "BAJA Crew" },
           { value: "8", label: "Office Bearers" },
+          { value: "34", label: "BAJA Crew" },
+          { value: "77", label: "SAE Members" },
           { value: "2", label: "Faculty Mentors" },
         ]}
       />
 
       <div className="max-w-7xl mx-auto px-5 sm:px-10 pb-24 space-y-16">
+        {/* Segmented Control with Office Bearers FIRST */}
         <Segmented
           id="team-seg"
           value={activeSegment}
           onChange={setActiveSegment}
           options={[
-            { key: "baja", label: "Current BAJA Team", short: "BAJA Team" },
             { key: "officers", label: "Office Bearers (2025–26)", short: "Officers" },
+            { key: "baja", label: "Current BAJA Team (2026–27)", short: "BAJA Team" },
+            { key: "chapter", label: "Collegiate Members (77)", short: "Members" },
             { key: "alumni", label: "Alumni Network", short: "Alumni" },
           ]}
         />
 
-        {/* ══ 1. CURRENT BAJA TEAM ════════════════════════════════════════ */}
-        {activeSegment === "baja" && (
-          <div className="space-y-16 animate-fadeIn">
-            {/* Leadership Spotlight Banner */}
-            <section className="space-y-8">
-              <SectionHead n={0} kicker="Team Leadership" title="Captains & Subsystem *Leads.*" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { name: "Harshit Mishra", role: "Team Captain & Powertrain Lead", subteam: "Powertrain" },
-                  { name: "Ramakrishna Sen", role: "Management Lead", subteam: "Management" },
-                  { name: "Jatin Sharma", role: "Suspension Lead", subteam: "Suspension" },
-                  { name: "Samarth Sakhale", role: "Brakes Head", subteam: "Brakes" },
-                  { name: "Uday Paul George", role: "Chassis Lead", subteam: "Chassis" },
-                  { name: "Prashant Kumar", role: "Steering Lead", subteam: "Steering" },
-                  { name: "Vishavjeet Singh Bhati", role: "Driver & Dynamics", subteam: "Vehicle Dynamics" },
-                ].map((lead, i) => (
-                  <Reveal key={lead.name} delay={i * 0.05}>
-                    <SpotCard className="p-5 border-apex-red/30 bg-apex-red/[0.04]">
-                      <div className="flex items-center gap-2 text-apex-red font-mono text-[10px] uppercase tracking-widest font-semibold mb-2">
-                        <Award size={12} /> {lead.subteam}
-                      </div>
-                      <h4 className="font-display font-semibold text-bone text-lg tracking-tight">{lead.name}</h4>
-                      <p className="text-bone/60 text-xs mt-1">{lead.role}</p>
-                    </SpotCard>
-                  </Reveal>
-                ))}
-              </div>
-            </section>
-
-            {/* BAJA Roster Section */}
-            <section className="space-y-10">
-              <SectionHead
-                n={1}
-                kicker="Subsystem Roster"
-                title="B-26 Engineering *Squad.*"
-                aside={
-                  <Segmented
-                    id="baja-filter"
-                    value={bajaFilter}
-                    onChange={setBajaFilter}
-                    options={[
-                      { key: "all", label: "Everyone", short: "All" },
-                      { key: "leads", label: "Leads Only", short: "Leads" },
-                      { key: "powertrain", label: "Powertrain", short: "Power" },
-                      { key: "suspension", label: "Suspension", short: "Susp" },
-                      { key: "chassis", label: "Chassis" },
-                      { key: "brakes", label: "Brakes" },
-                      { key: "steering", label: "Steering" },
-                      { key: "management", label: "Management", short: "Mgmt" },
-                    ]}
-                  />
-                }
-              />
-              <div key={bajaFilter} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {getFilteredBaja().map((m, i) => (
-                  <MemberCard key={`${m.name}-${m.subteam}-${i}`} m={m} i={i} />
-                ))}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* ══ 2. OFFICE BEARERS & ORG CHART ════════════════════════════════ */}
+        {/* ══ 1. OFFICE BEARERS & ADVISORY (FIRST SECTION) ══════════════ */}
         {activeSegment === "officers" && (
           <div className="space-y-20 animate-fadeIn">
-            {/* The Crew Media */}
-            <section className="space-y-10">
-              <SectionHead n={0} kicker="The crew" title="Meet us *before* *the* *car.*" />
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                <Reveal className="lg:col-span-7">
-                  <figure className="glass !rounded-[28px] overflow-hidden p-2">
-                    <video
-                      className="w-full aspect-video rounded-[22px] bg-black object-cover"
-                      src="/media/team-intro.mp4"
-                      poster="/media/team-intro-poster.webp"
-                      controls
-                      playsInline
-                      preload="none"
-                      onPlay={() => engine.duck(true)}
-                      onPause={() => engine.duck(false)}
-                      onEnded={() => engine.duck(false)}
-                    />
-                    <figcaption className="flex items-center justify-between gap-4 px-4 py-3">
-                      <span className="font-display font-medium text-bone tracking-[-0.01em]">A word from the team</span>
-                      <Label>B-26 · in their words</Label>
-                    </figcaption>
-                  </figure>
-                </Reveal>
-                <Reveal delay={0.1} className="lg:col-span-5">
-                  <figure className="glass !rounded-[28px] overflow-hidden p-2 h-full flex flex-col">
-                    <div className="relative flex-1 min-h-[260px] rounded-[22px] overflow-hidden">
-                      <Image src="/media/team-2025.webp" alt="The SAEINDIA IIITDM Kurnool team in front of the Mechanical Engineering block" fill sizes="(min-width:1024px) 40vw, 100vw" className="object-cover" />
+            {/* Leadership Spotlight: Individual Cards for Faculty Advisors, President & Vice President */}
+            <section className="space-y-8">
+              <SectionHead
+                n={0}
+                kicker="Collegiate Leadership"
+                title="Faculty Advisors & *Executive* *Chairs.*"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {/* Faculty Advisor 1: Dr. Akhtar Khan */}
+                <Reveal delay={0.0}>
+                  <SpotCard className="h-full p-6 border-white/15 bg-white/[0.03] flex flex-col relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-apex-red/15 border border-apex-red/35 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.25em] text-[#FF5A3C]">
+                        <ShieldCheck size={12} /> Faculty Mentor
+                      </span>
+                      <span className="font-mono text-[10px] uppercase text-bone/40">IIITDMK</span>
                     </div>
-                    <figcaption className="flex items-center justify-between gap-4 px-4 py-3">
-                      <span className="font-display font-medium text-bone tracking-[-0.01em]">The crew, 2025–26</span>
-                      <Label>Mechanical Engineering block</Label>
-                    </figcaption>
-                  </figure>
+                    <div className="mt-5 flex items-center gap-4">
+                      <div className="relative shrink-0 w-16 h-16 rounded-full p-[1.5px] bg-[conic-gradient(from_210deg,#E10600,#ffffff40,#8A0400,#FF5A3C,#E10600)]">
+                        <div className="w-full h-full rounded-full bg-[#0c0c0e] grid place-items-center font-display font-semibold text-bone text-lg">
+                          AK
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-display font-semibold text-bone text-xl tracking-tight">Dr. Akhtar Khan</h3>
+                        <p className="text-apex-red font-medium text-xs mt-0.5">Faculty Advisor</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-bone/60 text-[13.5px] leading-relaxed flex-1">
+                      Department of Mechanical Engineering, providing academic oversight, design verification, and institutional backing for chapter initiatives.
+                    </p>
+                    <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-[11px] font-mono text-bone/40">
+                      <span>Mechanical Engg.</span>
+                      <span className="text-[#FF5A3C]">Advisory</span>
+                    </div>
+                  </SpotCard>
+                </Reveal>
+
+                {/* Faculty Advisor 2: Dr. S. Anand Kumar */}
+                <Reveal delay={0.05}>
+                  <SpotCard className="h-full p-6 border-white/15 bg-white/[0.03] flex flex-col relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-apex-red/15 border border-apex-red/35 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.25em] text-[#FF5A3C]">
+                        <ShieldCheck size={12} /> Faculty Mentor
+                      </span>
+                      <span className="font-mono text-[10px] uppercase text-bone/40">IIITDMK</span>
+                    </div>
+                    <div className="mt-5 flex items-center gap-4">
+                      <div className="relative shrink-0 w-16 h-16 rounded-full p-[1.5px] bg-[conic-gradient(from_210deg,#E10600,#ffffff40,#8A0400,#FF5A3C,#E10600)]">
+                        <div className="w-full h-full rounded-full bg-[#0c0c0e] grid place-items-center font-display font-semibold text-bone text-lg">
+                          SA
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-display font-semibold text-bone text-xl tracking-tight">Dr. S. Anand Kumar</h3>
+                        <p className="text-apex-red font-medium text-xs mt-0.5">Faculty Advisor</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-bone/60 text-[13.5px] leading-relaxed flex-1">
+                      Department of Mechanical Engineering, guiding technical methodology, laboratory fabrication, and community outreach programmes including AWIM.
+                    </p>
+                    <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-[11px] font-mono text-bone/40">
+                      <span>Mechanical Engg.</span>
+                      <span className="text-[#FF5A3C]">Advisory</span>
+                    </div>
+                  </SpotCard>
+                </Reveal>
+
+                {/* President: Harshit Mishra */}
+                <Reveal delay={0.1}>
+                  <SpotCard className="h-full p-6 border-apex-red/40 bg-apex-red/[0.06] flex flex-col relative overflow-hidden shadow-[0_15px_40px_-20px_rgba(225,6,0,0.4)]">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-apex-red/25 border border-apex-red/50 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.25em] text-[#FF5A3C] font-semibold">
+                        <Award size={12} /> Executive Head
+                      </span>
+                      <span className="font-mono text-[10px] uppercase text-bone/40">2025–26</span>
+                    </div>
+                    <div className="mt-5 flex items-center gap-4">
+                      <div className="relative shrink-0 w-16 h-16 rounded-full p-[1.5px] bg-[conic-gradient(from_210deg,#E10600,#ffffff,#FF5A3C,#E10600)]">
+                        <div className="w-full h-full rounded-full bg-[#0c0c0e] grid place-items-center font-display font-bold text-bone text-xl">
+                          HM
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-display font-semibold text-bone text-xl tracking-tight">Harshit Mishra</h3>
+                        <p className="text-[#FF5A3C] font-medium text-xs mt-0.5">President</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-bone/70 text-[13.5px] leading-relaxed flex-1">
+                      Directs overall collegiate operations, government relations, and technical integration as Captain & Powertrain Lead for Team Monarch.
+                    </p>
+                    <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-[11px] font-mono text-bone/40">
+                      <span>Executive Council</span>
+                      <span className="text-[#FF5A3C]">President</span>
+                    </div>
+                  </SpotCard>
+                </Reveal>
+
+                {/* Vice President: Ramakrishna Sen */}
+                <Reveal delay={0.15}>
+                  <SpotCard className="h-full p-6 border-apex-red/40 bg-apex-red/[0.06] flex flex-col relative overflow-hidden shadow-[0_15px_40px_-20px_rgba(225,6,0,0.4)]">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-apex-red/25 border border-apex-red/50 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.25em] text-[#FF5A3C] font-semibold">
+                        <Award size={12} /> Executive Head
+                      </span>
+                      <span className="font-mono text-[10px] uppercase text-bone/40">2025–26</span>
+                    </div>
+                    <div className="mt-5 flex items-center gap-4">
+                      <div className="relative shrink-0 w-16 h-16 rounded-full p-[1.5px] bg-[conic-gradient(from_210deg,#E10600,#ffffff,#FF5A3C,#E10600)]">
+                        <div className="w-full h-full rounded-full bg-[#0c0c0e] grid place-items-center font-display font-bold text-bone text-xl">
+                          RS
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-display font-semibold text-bone text-xl tracking-tight">Ramakrishna Sen</h3>
+                        <p className="text-[#FF5A3C] font-medium text-xs mt-0.5">Vice President</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-bone/70 text-[13.5px] leading-relaxed flex-1">
+                      Heads internal collegiate administration, strategic planning, resource logistics, and serves as Management Lead for BAJA SAEINDIA.
+                    </p>
+                    <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-[11px] font-mono text-bone/40">
+                      <span>Executive Council</span>
+                      <span className="text-[#FF5A3C]">Vice President</span>
+                    </div>
+                  </SpotCard>
                 </Reveal>
               </div>
             </section>
 
             {/* Org Chart */}
             <section className="space-y-10">
-              <SectionHead n={1} kicker="Chain of command" title="Office Bearers & *Council* (2025–2026)" />
+              <SectionHead n={1} kicker="Chain of command" title="Governance & *Council* (2025–2026)" />
               <Reveal className="glass !rounded-[28px] px-5 sm:px-10 py-10 sm:py-14 relative overflow-hidden">
                 <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[70%] h-48 bg-[radial-gradient(ellipse_at_top,rgba(225,6,0,0.18),transparent_70%)]" />
-                <OrgNode label="Faculty advisors" names="Dr. S. Anand Kumar & Dr. Pankaj Kaushik" note="Department of Mechanical Engineering" />
+                <OrgNode label="Faculty Advisors" names="Dr. Akhtar Khan & Dr. S. Anand Kumar" note="Department of Mechanical Engineering · IIITDM Kurnool" />
                 <Wire />
-                <OrgNode hot label="Executive Council" names={<>Harshit Mishra <span className="text-bone/40 font-normal">· President</span><br />Ramakrishna Sen <span className="text-bone/40 font-normal">· Vice President</span></>} note="Chapter operations & governance" />
+                <OrgNode hot label="Executive Council" names={<>Harshit Mishra <span className="text-bone/40 font-normal">· President</span><br />Ramakrishna Sen <span className="text-bone/40 font-normal">· Vice President</span></>} note="Collegiate operations, strategic planning & governance" />
                 <Wire />
                 <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-3xl mx-auto">
                   <div aria-hidden className="hidden md:block absolute left-1/4 right-1/4 -top-px h-px bg-white/15" />
-                  <OrgNode label="Finance & Accounts" names="Vineet Sharma" note="Treasurer · budget & accounts" />
-                  <OrgNode label="Secretariat" names="Pranjal Mishra" note="Secretary · chapter records" />
+                  <OrgNode label="Finance & Accounts" names="Vineet Sharma" note="Treasurer · budget allocation & accounts" />
+                  <OrgNode label="Secretariat" names="Pranjal Mishra" note="Secretary · chapter documentation & records" />
                 </div>
                 <Wire className="hidden md:block" />
                 <div className="mt-4 md:mt-0 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-4xl mx-auto">
@@ -280,7 +327,7 @@ export default function TeamsTab() {
               </Reveal>
             </section>
 
-            {/* Directory */}
+            {/* Complete Directory */}
             <section className="space-y-10">
               <SectionHead
                 n={2}
@@ -293,23 +340,195 @@ export default function TeamsTab() {
                     onChange={setOfficerFilter}
                     options={[
                       { key: "all", label: "All Officers", short: "All" },
+                      { key: "faculty", label: "Faculty", short: "Faculty" },
                       { key: "executive", label: "Executive Council", short: "Exec" },
                       { key: "chairs", label: "Chairs", short: "Chairs" },
-                      { key: "faculty", label: "Faculty", short: "Faculty" },
                     ]}
                   />
                 }
               />
               <div key={officerFilter} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {getFilteredOfficers().map((m, i) => (
-                  <MemberCard key={`${m.name}-${m.role}`} m={m} i={i} />
+                  <MemberCard key={`${m.name}-${m.role}-${i}`} m={m} i={i} />
                 ))}
               </div>
             </section>
           </div>
         )}
 
-        {/* ══ 3. ALUMNI NETWORK ════════════════════════════════════════════ */}
+        {/* ══ 2. CURRENT BAJA TEAM (2026–2027) ══════════════════════════ */}
+        {activeSegment === "baja" && (
+          <div className="space-y-16 animate-fadeIn">
+            {/* The Crew Media Section with updated 2026-2027 Photo Caption */}
+            <section className="space-y-10">
+              <SectionHead n={0} kicker="The crew" title="BAJA Team *2026–2027.*" />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <Reveal className="lg:col-span-7">
+                  <figure className="glass !rounded-[28px] overflow-hidden p-2">
+                    <video
+                      className="w-full aspect-video rounded-[22px] bg-black object-cover"
+                      src="/media/team-intro.mp4"
+                      poster="/media/team-intro-poster.webp"
+                      controls
+                      playsInline
+                      preload="none"
+                      onPlay={() => engine.duck(true)}
+                      onPause={() => engine.duck(false)}
+                      onEnded={() => engine.duck(false)}
+                    />
+                    <figcaption className="flex items-center justify-between gap-4 px-4 py-3">
+                      <span className="font-display font-medium text-bone tracking-[-0.01em]">A word from the team</span>
+                      <Label>B-26 · in their words</Label>
+                    </figcaption>
+                  </figure>
+                </Reveal>
+                <Reveal delay={0.1} className="lg:col-span-5">
+                  <figure className="glass !rounded-[28px] overflow-hidden p-2 h-full flex flex-col">
+                    <div className="relative flex-1 min-h-[260px] rounded-[22px] overflow-hidden">
+                      <Image
+                        src="/media/team-2025.webp"
+                        alt="The BAJA SAEINDIA 2026-2027 Team in front of the Mechanical Engineering block"
+                        fill
+                        sizes="(min-width:1024px) 40vw, 100vw"
+                        className="object-cover"
+                      />
+                    </div>
+                    <figcaption className="flex items-center justify-between gap-4 px-4 py-3">
+                      <div>
+                        <span className="font-display font-medium text-bone tracking-[-0.01em] block">The crew, 2026–27</span>
+                        <span className="text-[11px] font-mono text-[#FF5A3C]">BAJA Team 2026–2027</span>
+                      </div>
+                      <Label>Mechanical Engineering block</Label>
+                    </figcaption>
+                  </figure>
+                </Reveal>
+              </div>
+            </section>
+
+            {/* Leadership Spotlight Banner */}
+            <section className="space-y-8">
+              <SectionHead n={1} kicker="Team Leadership" title="Captains & Subsystem *Leads.*" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { name: "Harshit Mishra", role: "Team Captain & Powertrain Lead", subteam: "Powertrain" },
+                  { name: "Ramakrishna Sen", role: "Management Lead", subteam: "Management" },
+                  { name: "Jatin Sharma", role: "Suspension Lead", subteam: "Suspension" },
+                  { name: "Samarth Sakhale", role: "Brakes Head", subteam: "Brakes" },
+                  { name: "Uday Paul George", role: "Chassis Lead", subteam: "Chassis" },
+                  { name: "Prashant Kumar", role: "Steering Lead", subteam: "Steering" },
+                  { name: "Vishavjeet Singh Bhati", role: "Driver & Dynamics", subteam: "Vehicle Dynamics" },
+                ].map((lead, i) => (
+                  <Reveal key={lead.name} delay={i * 0.05}>
+                    <SpotCard className="p-5 border-apex-red/30 bg-apex-red/[0.04]">
+                      <div className="flex items-center gap-2 text-apex-red font-mono text-[10px] uppercase tracking-widest font-semibold mb-2">
+                        <Award size={12} /> {lead.subteam}
+                      </div>
+                      <h4 className="font-display font-semibold text-bone text-lg tracking-tight">{lead.name}</h4>
+                      <p className="text-bone/60 text-xs mt-1">{lead.role}</p>
+                    </SpotCard>
+                  </Reveal>
+                ))}
+              </div>
+            </section>
+
+            {/* BAJA Roster Section */}
+            <section className="space-y-10">
+              <SectionHead
+                n={2}
+                kicker="Subsystem Roster"
+                title="B-26 Engineering *Squad.*"
+                aside={
+                  <Segmented
+                    id="baja-filter"
+                    value={bajaFilter}
+                    onChange={setBajaFilter}
+                    options={[
+                      { key: "all", label: "Everyone", short: "All" },
+                      { key: "leads", label: "Leads Only", short: "Leads" },
+                      { key: "powertrain", label: "Powertrain", short: "Power" },
+                      { key: "suspension", label: "Suspension", short: "Susp" },
+                      { key: "chassis", label: "Chassis" },
+                      { key: "brakes", label: "Brakes" },
+                      { key: "steering", label: "Steering" },
+                      { key: "management", label: "Management", short: "Mgmt" },
+                    ]}
+                  />
+                }
+              />
+              <div key={bajaFilter} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {getFilteredBaja().map((m, i) => (
+                  <MemberCard key={`${m.name}-${m.subteam}-${i}`} m={m} i={i} />
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* ══ 3. SAE COLLEGIATE CHAPTER MEMBERS (77 MEMBERS) ════════════ */}
+        {activeSegment === "chapter" && (
+          <div className="space-y-10 animate-fadeIn">
+            <SectionHead
+              n={0}
+              kicker="Collegiate Cohort"
+              title="Registered SAE *Members.*"
+              aside={
+                <div className="glass !rounded-full flex items-center gap-3 px-4 py-2 w-full sm:w-72">
+                  <Search size={14} className="text-bone/40 shrink-0" />
+                  <input
+                    type="text"
+                    value={memberSearch}
+                    onChange={(e) => setMemberSearch(e.target.value)}
+                    placeholder="Search name, branch, year…"
+                    className="w-full bg-transparent text-sm text-bone placeholder:text-bone/30 focus:outline-none"
+                  />
+                </div>
+              }
+            />
+
+            <div className="glass !rounded-3xl p-6 sm:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08]">
+                <div>
+                  <h3 className="font-display font-semibold text-bone text-2xl tracking-tight">Collegiate Chapter Roster</h3>
+                  <p className="mt-1 text-bone/50 text-sm">Official student members of SAEINDIA Collegiate Chapter at IIITDM Kurnool ({filteredMembers.length} displayed)</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/10 px-3 py-1 font-mono text-[11px] text-bone/70">
+                    <UserCheck size={13} className="text-[#FF5A3C]" /> 77 Active Members
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredMembers.map((m, i) => (
+                  <div
+                    key={`${m.email}-${i}`}
+                    className="rounded-2xl border border-white/[0.07] bg-black/30 hover:bg-white/[0.04] p-4 flex items-center gap-3.5 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 grid place-items-center font-display font-semibold text-bone text-xs shrink-0">
+                      {m.initials}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display font-medium text-bone text-sm truncate tracking-tight">{m.name}</p>
+                      <p className="text-bone/50 text-xs truncate mt-0.5">{m.degree}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-bone/40 block">Class</span>
+                      <span className="font-mono text-xs text-[#FF5A3C] font-semibold">{m.graduationYear}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {filteredMembers.length === 0 && (
+                <div className="py-16 text-center text-bone/40">
+                  <p className="font-display text-lg">No members found matching &quot;{memberSearch}&quot;</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ══ 4. ALUMNI NETWORK ═════════════════════════════════════════ */}
         {activeSegment === "alumni" && (
           <div className="space-y-12 animate-fadeIn">
             <Reveal className="glass !rounded-[28px] relative overflow-hidden px-6 sm:px-14 py-14 sm:py-20">
@@ -329,7 +548,7 @@ export default function TeamsTab() {
               {[
                 { v: "0", l: "Graduated alumni", d: "Inaugural cohort in training" },
                 { v: "2025", l: "Chartered", d: "SAEINDIA collegiate chapter" },
-                { v: "34+", l: "Active members", d: "Building the B-26" },
+                { v: "77", l: "Active members", d: "Enrolled in chapter" },
                 { v: "’27", l: "First graduates", d: "Class of 2027–28" },
               ].map((st, i) => (
                 <Reveal key={st.l} delay={i * 0.06}>

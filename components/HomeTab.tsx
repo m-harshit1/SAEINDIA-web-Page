@@ -171,8 +171,8 @@ function TypedLine({ p, i, n, children }: { p: MotionValue<number>; i: number; n
 }
 
 const CODE: React.ReactNode[] = [
-  <React.Fragment key={0}><span className="text-apex-red">const</span> frame = <span className="text-bone">new</span> SpaceFrame(<span className="text-[#A9B1BB]">&quot;Chromoly 4030&quot;</span>)</React.Fragment>,
-  <React.Fragment key={1}>frame.envelope = [<span className="text-bone">2000</span>, <span className="text-bone">700</span>] <span className="text-bone/30">{"// mm"}</span></React.Fragment>,
+  <React.Fragment key={0}><span className="text-apex-red">const</span> frame = <span className="text-bone">new</span> SpaceFrame(<span className="text-[#A9B1BB]">&quot;AISI 4130 Chromoly&quot;</span>)</React.Fragment>,
+  <React.Fragment key={1}>frame.envelope = [<span className="text-bone">2138</span>, <span className="text-bone">860</span>, <span className="text-bone">1391</span>] <span className="text-bone/30">{"// mm"}</span></React.Fragment>,
   <React.Fragment key={2}><span className="text-apex-red">const</span> fea = ansys.solve(frame, {"{"} load: <span className="text-bone">30_000</span> {"}"})</React.Fragment>,
   <React.Fragment key={3}>assert(fea.safetyFactor &gt;= <span className="text-bone">2.0</span>)</React.Fragment>,
   <span key={4} className="text-bone/30">{"// ✓ safetyFactor = 2.1 — cleared to build"}</span>,
@@ -492,7 +492,7 @@ export default function HomeTab({ switchPage, onHeroDone }: HomeTabProps) {
             Every machine starts as a story. This one starts as a cloud of ideas in Kurnool — keep scrolling and watch it become a race car.
           </p>
           <div className="glass mt-8 grid grid-cols-3 max-w-md divide-x divide-white/10 [@media(max-height:820px)]:!hidden">
-            {[["77", "Engineers"], ["1", "Machine"], ["50.1", "km/h top"]].map(([v, l]) => (
+            {[["77", "Engineers"], ["1", "Machine"], ["75.2", "km/h top"]].map(([v, l]) => (
               <div key={l} className="px-4 py-4">
                 <div className="gloss-text-static font-display font-semibold text-3xl tracking-[-0.04em] tabular-nums">{v}</div>
                 <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.3em] text-bone/55">{l}</div>
@@ -534,7 +534,7 @@ export default function HomeTab({ switchPage, onHeroDone }: HomeTabProps) {
           <p className="mt-6 text-bone/60 text-[15px] leading-relaxed max-w-md [@media(max-height:740px)]:hidden">
             In the welding lab the model turns physical — TIG-welded joints, an engine at its heart and a driveline built to survive every jump.
           </p>
-          <div className="mt-8" /><SpecRows rows={[["Frame", "Chromoly AISI 4030 / 1013"], ["Engine", "Honda GX430T · 425 cc · 12.87 HP"], ["Drive", "CVT 3:1 → 0.43:1 · 4WD"], ["Suspension", "Double wishbone · ±100 mm"]]} />
+          <div className="mt-8" /><SpecRows rows={[["Frame", "Chromoly AISI 4130 · Arc Welded"], ["Transmission", "JIT CVT with Custom 9:1 Gearbox"], ["Drive", "4WD Single-Speed Transfer Case · 35:65 Split"], ["Suspension", "Double Wishbone (A-arm / H-arm) · 160 mm travel"]]} />
           <div className="mt-6 hidden lg:block [@media(max-height:820px)]:!hidden"><Still src="/media/mockup-team.webp" caption="Roll-cage mock-up · Kurnool" /></div>
         </Chapter>
 
@@ -563,7 +563,7 @@ export default function HomeTab({ switchPage, onHeroDone }: HomeTabProps) {
             ))}
           </dl>
           <div className="mt-8 flex gap-3 items-center">
-            <div className="hidden lg:block [@media(max-height:820px)]:!hidden"><Still src="/media/team-2025.webp" caption="The crew · 2025–26" /></div>
+            <div className="hidden lg:block [@media(max-height:820px)]:!hidden"><Still src="/media/team-2025.webp" caption="BAJA Team · 2026–27" /></div>
             <button onClick={() => switchPage("teams")} className="btn-glass rounded-full px-5 py-3 text-sm text-bone cursor-pointer transition-colors">Meet the team →</button>
           </div>
         </Chapter>
@@ -573,7 +573,7 @@ export default function HomeTab({ switchPage, onHeroDone }: HomeTabProps) {
           <Kicker n={5}>The track</Kicker>
           <Title text="And the track *writes* *the* *ending.*" className="text-[clamp(2.6rem,5.6vw,5.2rem)]" />
           <dl className="glass mt-10 p-5 sm:p-6 grid grid-cols-3 gap-6 max-w-lg">
-            {[["50.1", "km/h", "Top speed"], ["166.2", "Nm", "Wheel torque"], ["2.94", "m/s²", "Acceleration"]].map(([v, u, l]) => (
+            {[["75.2", "km/h", "Top speed"], ["1657", "N", "Tractive effort"], ["7.85", "m/s²", "Deceleration"]].map(([v, u, l]) => (
               <div key={l}>
                 <dd className="font-display font-semibold text-bone text-3xl sm:text-4xl tracking-[-0.04em] tabular-nums">
                   {v}<span className="ml-1 text-xs text-bone/40 tracking-normal font-normal">{u}</span>

@@ -41,7 +41,7 @@ export default function HeroOverlay({
 
       if (speedo.current) {
         const u = Math.min(1, Math.max(0, (t - HERO.race) / (HERO.rewind - HERO.race - 0.4)));
-        speedo.current.textContent = (50.1 * (1 - Math.pow(1 - u, 3))).toFixed(1);
+        speedo.current.textContent = (75.2 * (1 - Math.pow(1 - u, 3))).toFixed(1);
       }
       raf = requestAnimationFrame(tick);
     };

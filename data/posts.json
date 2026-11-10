@@ -1,6 +1,17 @@
 [
   {
     "id": 1,
+    "title": "Team Monarch Secures Rank 12 Nationally & 2nd Among CFTIs in mBAJA SAEINDIA 2027 Virtual Round",
+    "excerpt": "Team Monarch from IIITDM Kurnool delivers an exceptional preliminary round performance, scoring 34.98/50 to secure 12th rank out of 49 engineering institutions across India and 2nd among Centrally Funded Technical Institutes.",
+    "content": "We are proud and delighted to share the remarkable performance of Team Monarch in the mBAJA SAEINDIA 2027 Virtual Event (Preliminary Round).\n\nCompeting against the finest collegiate automotive engineering programs across India, Team Monarch from IIITDM Kurnool demonstrated outstanding technical preparation, deep subsystem knowledge, and meticulous IPG CarMaker modeling and design analysis.\n\n### Official Performance Breakdown:\n- **Quiz Round Score:** 8.10 / 10\n- **Design & Presentation Score:** 26.88 / 40\n- **Overall Preliminary Round Score:** 34.98 / 50\n\n### Historic Milestones for IIITDM Kurnool:\n- **12th Position Nationally** among 49 participating colleges in the mBAJA Virtual Round.\n- **2nd Position among all Centrally Funded Technical Institutes (CFTIs)** that competed in the mBAJA division.\n\nThis performance solidifies our roadmap towards the physical build of the B-26 all-terrain buggy and clears our qualification for the dynamic and endurance challenges at BAJA SAEINDIA 2027.\n\nHeartiest congratulations to our captain Harshit Mishra, vice captain Ramakrishna Sen, all subsystem leads, team engineers, and our faculty advisors Dr. Akhtar Khan and Dr. S. Anand Kumar for their guidance and dedication!",
+    "category": "Competitions",
+    "author": "Team Monarch",
+    "date": "November 2026",
+    "lastUpdated": "November 2026",
+    "readTime": "3 min read"
+  },
+  {
+    "id": 2,
     "title": "We Built the B-26 in PVC First",
     "excerpt": "Before cutting a single steel tube, the team built a full-size PVC mock-up of the roll cage to check driver fit, clearances and sight lines against the CAD model.",
     "content": "Steel is expensive and unforgiving, so the B-26's roll cage was built twice — first in PVC.\n\nWorking from the SolidWorks model, the team cut and joined PVC members to the exact node positions of the design, laying sections out on the workshop floor and assembling them joint by joint. With the laptop open beside the mock-up, every member was checked against the CAD dimensions as it went in.\n\nA full-size mock-up answers questions a screen can't: can a driver get in and out quickly, do helmets clear the roof members, can the driver see over the front bracing, and is there room for the steering, pedals and firewall where the model says there is. Anything that doesn't fit is changed in CAD now — not after the frame is welded.\n\nNext step: lock the geometry, finish the structural checks in ANSYS and move to fabricating the real chassis.",
@@ -11,7 +22,7 @@
     "readTime": "3 min read"
   },
   {
-    "id": 2,
+    "id": 3,
     "title": "AWIM Program Expands: 3 Rural Schools Adopted in Kurnool District",
     "excerpt": "SAE collegiate mentors successfully deployed gravity and jet propulsion science kits, mentoring over 80 elementary school children.",
     "content": "Under our commitment to corporate social responsibility (CSR) and community outreach, the SAEINDIA collegiate chapter at IIITDM Kurnool has adopted three rural schools in the Orvakal district segment.\n\nOur mentors hosted AWIM (A World In Motion) JetToy and Skimmer workshops, teaching primary physical laws and aerospace concepts to children. Students assembled physical models using air-pressure balloon thrusters, plotting distance grids to analyze velocity decay rates. Special thanks to our Faculty Advisor, Dr. S. Anand Kumar, for coordinating logistics with local school boards.",
@@ -22,10 +33,10 @@
     "readTime": "3 min read"
   },
   {
-    "id": 3,
-    "title": "IIITDM Kurnool SAEINDIA Collegiate Chapter Inducts Class of 2026 Board",
-    "excerpt": "The chapter completed annual elections, appointing new subteam captains, finance managers, and outreach leads for the fiscal campaign.",
-    "content": "We are excited to announce the official board appointments for the upcoming fiscal campaign. Following nominations reviewed by Faculty Co-supervisors, the executive board is tasked with preparing budget allocation sheets and managing sponsor relations.\n\nHarshit Kumar Mishra is re-appointed as President, with N M Roshanth serving as Vice-President. The team's primary milestone is validating design rules for a planned transition into the Formula Student EV category by winter 2027.",
+    "id": 4,
+    "title": "IIITDM Kurnool SAEINDIA Collegiate Chapter Inducts 2025–26 Executive Board",
+    "excerpt": "The collegiate chapter announced its executive leadership council and chairs for the 2025–2026 academic year.",
+    "content": "We are excited to announce the official board appointments for the 2025–2026 term. Under the mentorship of faculty advisors Dr. Akhtar Khan and Dr. S. Anand Kumar, the executive council steers both the collegiate chapter and Team Monarch's BAJA campaign.\n\nHarshit Mishra serves as President alongside Vice President Ramakrishna Sen, Treasurer Vineet Sharma, Secretary Pranjal Mishra, and student chairs Shanu Jha, Jatin Sharma, Prashant Kumar, and Karthikeya.",
     "category": "Announcements",
     "author": "Executive Board",
     "date": "June 10, 2026",
