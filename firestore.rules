@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// SAEINDIA IIITDM Kurnool — access rules (these are what actually enforce roles).
+//   Admin  : verified Google account on the allow-list below (the only place admins are defined).
+//   Member : verified @iiitk.ac.in Google account (or an admin).
+//   Public : can read blog posts and submit applications — nothing else.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function emailLower() { return request.auth.token.email.lower(); }
+    function isAdmin()  { return signedIn() && emailLower() in ['mrpjpandey@gmail.com', 'mishraharshit664@gmail.com']; }
+    function isMember() { return signedIn() && (emailLower().matches('.*@iiitk[.]ac[.]in$') || isAdmin()); }
+    function text(v, max) { return v is string && v.size() <= max; }
+    function nonEmpty(v, max) { return text(v, max) && v.size() > 0; }
+    function d() { return request.resource.data; }
+
+    // Blog bulletins: public read, admins publish.
+    match /posts/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() && nonEmpty(d().title, 200) && nonEmpty(d().content, 20000);
+      allow delete: if isAdmin();
+    }
+
+    // Recruitment applications: anyone may submit one (validated); only admins read.
+    match /applications/{id} {
+      allow create: if d().keys().hasOnly(['referenceCode', 'name', 'rollNumber', 'email', 'phone', 'branch',
+                                           'year', 'domain', 'secondaryDomain', 'coverText', 'status', 'submittedAt'])
+                    && nonEmpty(d().name, 100)
+                    && text(d().referenceCode, 40) && text(d().rollNumber, 40) && text(d().email, 120)
+                    && text(d().phone, 30) && text(d().branch, 80) && text(d().year, 20)
+                    && text(d().domain, 120) && text(d().secondaryDomain, 120) && text(d().coverText, 4000)
+                    && d().status == 'Application Under Review'
+                    && d().submittedAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // B-26 sprint game leaderboard: public read; anyone may post a validated time; admins moderate.
+    match /laps/{id} {
+      allow read: if true;
+      allow create: if d().keys().hasOnly(['name', 'ms', 'cones', 'createdAt'])
+                    && nonEmpty(d().name, 20)
+                    && d().ms is int && d().ms >= 20000 && d().ms <= 900000
+                    && d().cones is int && d().cones >= 0 && d().cones <= 200
+                    && d().createdAt == request.time;
+      allow delete: if isAdmin();
+    }
+
+    // Sprint tasks: members create and move tasks; admins delete.
+    match /tasks/{id} {
+      allow read: if isMember();
+      allow create: if isMember() && nonEmpty(d().title, 200) && text(d().assignee, 100)
+                    && d().priority in ['High', 'Medium', 'Low'] && d().status == 'Todo';
+      allow update: if isMember()
+                    && d().diff(resource.data).affectedKeys().hasOnly(['status'])
+                    && d().status in ['Todo', 'In-Progress', 'Done'];
+      allow delete: if isAdmin();
+    }
+
+    // Roster, workshop inventory, attendance: members read, admins manage.
+    match /members/{id}    { allow read: if isMember(); allow write: if isAdmin(); }
+    match /inventory/{id}  { allow read: if isMember(); allow write: if isAdmin(); }
+    match /attendance/{id} { allow read: if isMember(); allow write: if isAdmin(); }
+
+    // Everything else is closed.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

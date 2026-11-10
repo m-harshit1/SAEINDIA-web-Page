@@ -1,0 +1,16 @@
+{
+  "name": "SAEINDIA Collegiate Chapter IIITDM Kurnool",
+  "short_name": "SAEINDIA IIITDMK",
+  "description": "SAEINDIA IIITDM Kurnool. Building the B-26 for our BAJA SAEINDIA debut in 2027.",
+  "start_url": "/?tab=home",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+      }
+    ]
+}

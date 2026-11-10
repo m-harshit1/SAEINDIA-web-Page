@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "title": "We Built the B-26 in PVC First",
+    "excerpt": "Before cutting a single steel tube, the team built a full-size PVC mock-up of the roll cage to check driver fit, clearances and sight lines against the CAD model.",
+    "content": "Steel is expensive and unforgiving, so the B-26's roll cage was built twice — first in PVC.\n\nWorking from the SolidWorks model, the team cut and joined PVC members to the exact node positions of the design, laying sections out on the workshop floor and assembling them joint by joint. With the laptop open beside the mock-up, every member was checked against the CAD dimensions as it went in.\n\nA full-size mock-up answers questions a screen can't: can a driver get in and out quickly, do helmets clear the roof members, can the driver see over the front bracing, and is there room for the steering, pedals and firewall where the model says there is. Anything that doesn't fit is changed in CAD now — not after the frame is welded.\n\nNext step: lock the geometry, finish the structural checks in ANSYS and move to fabricating the real chassis.",
+    "category": "Testing",
+    "author": "B-26 build team",
+    "date": "November 2026",
+    "lastUpdated": "November 2026",
+    "readTime": "3 min read"
+  },
+  {
+    "id": 2,
+    "title": "AWIM Program Expands: 3 Rural Schools Adopted in Kurnool District",
+    "excerpt": "SAE collegiate mentors successfully deployed gravity and jet propulsion science kits, mentoring over 80 elementary school children.",
+    "content": "Under our commitment to corporate social responsibility (CSR) and community outreach, the SAEINDIA collegiate chapter at IIITDM Kurnool has adopted three rural schools in the Orvakal district segment.\n\nOur mentors hosted AWIM (A World In Motion) JetToy and Skimmer workshops, teaching primary physical laws and aerospace concepts to children. Students assembled physical models using air-pressure balloon thrusters, plotting distance grids to analyze velocity decay rates. Special thanks to our Faculty Advisor, Dr. S. Anand Kumar, for coordinating logistics with local school boards.",
+    "category": "AWIM Outreach",
+    "author": "Sneha Nair (PR Coordinator)",
+    "date": "June 02, 2026",
+    "lastUpdated": "June 02, 2026",
+    "readTime": "3 min read"
+  },
+  {
+    "id": 3,
+    "title": "IIITDM Kurnool SAEINDIA Collegiate Chapter Inducts Class of 2026 Board",
+    "excerpt": "The chapter completed annual elections, appointing new subteam captains, finance managers, and outreach leads for the fiscal campaign.",
+    "content": "We are excited to announce the official board appointments for the upcoming fiscal campaign. Following nominations reviewed by Faculty Co-supervisors, the executive board is tasked with preparing budget allocation sheets and managing sponsor relations.\n\nHarshit Kumar Mishra is re-appointed as President, with N M Roshanth serving as Vice-President. The team's primary milestone is validating design rules for a planned transition into the Formula Student EV category by winter 2027.",
+    "category": "Announcements",
+    "author": "Executive Board",
+    "date": "June 10, 2026",
+    "lastUpdated": "June 12, 2026",
+    "readTime": "2 min read"
+  }
+]

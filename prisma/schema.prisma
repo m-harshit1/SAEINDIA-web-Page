@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("Admin")
+  createdAt    DateTime @default(now())
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  title     String
+  assignee  String
+  status    String   @default("Todo") // Todo, In-Progress, Done
+  priority  String   @default("Medium") // High, Medium, Low
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id           String   @id @default(cuid())
+  membershipId String   @unique
+  name         String
+  role         String
+  department   String
+  email        String   @unique
+  yearJoined   Int
+  createdAt    DateTime @default(now())
+}
+
+model InventoryItem {
+  id        String   @id @default(cuid())
+  name      String
+  qty       String
+  status    String   @default("In Stock") // In Stock, Low Stock, Allocated
+  dept      String
+  createdAt DateTime @default(now())
+}
+
+model AttendanceRecord {
+  id        String   @id @default(cuid())
+  name      String
+  hours     Float    @default(0)
+  role      String
+  status    String   @default("Present") // Present, Absent
+  createdAt DateTime @default(now())
+}

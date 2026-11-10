@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "referenceCode": "BAJA-APP-2026-0001",
+    "name": "Aman Gupta",
+    "rollNumber": "24BME015",
+    "email": "24bme015@iiitk.ac.in",
+    "phone": "+91 98765 43210",
+    "branch": "Mechanical Engineering",
+    "year": "1st Year",
+    "domain": "Chassis & Spaceframe Structural Design",
+    "secondaryDomain": "Suspension, Steering & Wheel Kinematics",
+    "coverText": "Proficient with SolidWorks and eager to contribute to spaceframe fabrication.",
+    "submittedAt": "2026-11-09T10:19:58.485Z",
+    "status": "Application Under Review"
+  }
+]
