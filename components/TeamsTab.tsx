@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail } from 'lucide-react';
+import { Mail, Award } from 'lucide-react';
 import {
-  facultyAdvisors, executiveBoard, coreLeadership, subsystemLeads,
-  managementTeam, TeamMember
+  facultyAdvisors, officeBearers, bajaTeam, TeamMember
 } from '@/data/teamData';
 import Image from 'next/image';
 import { PageHero, SectionHead, Segmented, SpotCard, Reveal, Label } from './cinema/PageKit';
@@ -18,23 +17,9 @@ const Linkedin = ({ size = 24, ...props }: React.ComponentPropsWithoutRef<'svg'>
   </svg>
 );
 
-type Filter = "all" | "faculty" | "leadership" | "technical" | "management";
-
-const LEADS = {
-  engineering: [
-    ["Chassis & structure", "V. Akash"],
-    ["Suspension & geometry", "Vineet Sharma"],
-    ["Drivetrain & transmission", "N M Roshanth"],
-    ["Brakes & steering", "Samarth Sakhale"],
-    ["Electrical & DAQ", "Sneha Nair"],
-  ],
-  management: [
-    ["Sponsors & CSR outreach", "Priya Patel"],
-    ["Finance & billing", "Aman Sharma"],
-    ["PR, media & design", "Rohan Verma"],
-    ["AWIM programme", "Sneha Nair"],
-  ],
-};
+type Segment = "baja" | "officers" | "alumni";
+type BajaFilter = "all" | "leads" | "powertrain" | "suspension" | "chassis" | "brakes" | "steering" | "management";
+type OfficerFilter = "all" | "executive" | "chairs" | "faculty";
 
 /** One rung of the org chart. */
 function OrgNode({ label, names, note, hot = false }: { label: string; names: React.ReactNode; note: string; hot?: boolean }) {
@@ -55,8 +40,13 @@ const Wire = ({ className = "" }: { className?: string }) => (
 
 function MemberCard({ m, i }: { m: TeamMember; i: number }) {
   return (
-    <Reveal delay={Math.min(i, 6) * 0.05} className="h-full">
-      <SpotCard className="h-full p-6 flex flex-col">
+    <Reveal delay={Math.min(i, 6) * 0.04} className="h-full">
+      <SpotCard className="h-full p-6 flex flex-col relative overflow-hidden">
+        {m.isLead && (
+          <div className="absolute top-0 right-0 bg-gradient-to-l from-apex-red/30 to-transparent text-apex-red px-3 py-1 text-[10px] font-mono uppercase tracking-widest font-semibold flex items-center gap-1">
+            <Award size={11} /> Lead
+          </div>
+        )}
         <div className="flex items-center gap-4">
           <div className="relative shrink-0 w-14 h-14 rounded-full p-[1.5px] bg-[conic-gradient(from_210deg,#E10600,#ffffff40,#8A0400,#FF5A3C,#E10600)]">
             <div className="w-full h-full rounded-full bg-[#0c0c0e] grid place-items-center font-display font-semibold text-bone text-base tracking-[-0.02em]">
@@ -68,7 +58,7 @@ function MemberCard({ m, i }: { m: TeamMember; i: number }) {
             <Label className="block mt-1 truncate">{m.subteam}</Label>
           </div>
         </div>
-        <p className="mt-5 text-bone/65 text-[15px] leading-relaxed flex-1">{m.role}</p>
+        <p className="mt-5 text-bone/70 text-[14.5px] font-medium leading-relaxed flex-1">{m.role}</p>
         <div className="mt-5 pt-4 border-t border-white/[0.07] flex items-center gap-2">
           {m.email && (
             <a href={`mailto:${m.email}`} title={`Email ${m.name}`} className="btn-glass w-9 h-9 rounded-full grid place-items-center text-bone/60 hover:text-bone transition-colors">
@@ -90,16 +80,29 @@ function MemberCard({ m, i }: { m: TeamMember; i: number }) {
 }
 
 export default function TeamsTab() {
-  const [activeSegment, setActiveSegment] = useState<"officers" | "alumni">("officers");
-  const [activeTab, setActiveTab] = useState<Filter>("all");
+  const [activeSegment, setActiveSegment] = useState<Segment>("baja");
+  const [bajaFilter, setBajaFilter] = useState<BajaFilter>("all");
+  const [officerFilter, setOfficerFilter] = useState<OfficerFilter>("all");
 
-  const getFilteredMembers = () => {
-    switch (activeTab) {
+  const getFilteredBaja = () => {
+    switch (bajaFilter) {
+      case "leads": return bajaTeam.filter(m => m.isLead);
+      case "powertrain": return bajaTeam.filter(m => m.subteam === "Powertrain");
+      case "suspension": return bajaTeam.filter(m => m.subteam === "Suspension");
+      case "chassis": return bajaTeam.filter(m => m.subteam === "Chassis");
+      case "brakes": return bajaTeam.filter(m => m.subteam === "Brakes");
+      case "steering": return bajaTeam.filter(m => m.subteam === "Steering");
+      case "management": return bajaTeam.filter(m => m.subteam === "Management" || m.subteam === "Intern");
+      default: return bajaTeam;
+    }
+  };
+
+  const getFilteredOfficers = () => {
+    switch (officerFilter) {
+      case "executive": return officeBearers.filter(m => m.subteam === "Executive Council");
+      case "chairs": return officeBearers.filter(m => m.subteam === "Chapter Chairs");
       case "faculty": return facultyAdvisors;
-      case "leadership": return [...executiveBoard, ...coreLeadership];
-      case "technical": return subsystemLeads;
-      case "management": return managementTeam;
-      default: return [...facultyAdvisors, ...executiveBoard, ...coreLeadership, ...subsystemLeads, ...managementTeam];
+      default: return [...facultyAdvisors, ...officeBearers];
     }
   };
 
@@ -108,12 +111,12 @@ export default function TeamsTab() {
       <PageHero
         kicker="Teams · The crew"
         title="The people behind the *cage.*"
-        sub="Seventy-seven students from every branch — welders, coders, analysts and dealmakers — who turned a chapter founded in 2025 into a car that runs."
-        ghost="77"
+        sub="The engineers, drivers, and leaders who design, fabricate, and test the B-26 all-terrain vehicle for BAJA SAEINDIA."
+        ghost="B26"
         stats={[
-          { value: "77", label: "Engineers" },
-          { value: "5", label: "Subsystems" },
-          { value: "2", label: "Faculty mentors" },
+          { value: "34", label: "BAJA Crew" },
+          { value: "8", label: "Office Bearers" },
+          { value: "2", label: "Faculty Mentors" },
         ]}
       />
 
@@ -123,14 +126,78 @@ export default function TeamsTab() {
           value={activeSegment}
           onChange={setActiveSegment}
           options={[
-            { key: "officers", label: "Officers & org chart", short: "Officers" },
-            { key: "alumni", label: "Alumni network", short: "Alumni" },
+            { key: "baja", label: "Current BAJA Team", short: "BAJA Team" },
+            { key: "officers", label: "Office Bearers (2025–26)", short: "Officers" },
+            { key: "alumni", label: "Alumni Network", short: "Alumni" },
           ]}
         />
 
-        {activeSegment === "officers" ? (
+        {/* ══ 1. CURRENT BAJA TEAM ════════════════════════════════════════ */}
+        {activeSegment === "baja" && (
+          <div className="space-y-16 animate-fadeIn">
+            {/* Leadership Spotlight Banner */}
+            <section className="space-y-8">
+              <SectionHead n={0} kicker="Team Leadership" title="Captains & Subsystem *Leads.*" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { name: "Harshit Mishra", role: "Team Captain & Powertrain Lead", subteam: "Powertrain" },
+                  { name: "Ramakrishna Sen", role: "Management Lead", subteam: "Management" },
+                  { name: "Jatin Sharma", role: "Suspension Lead", subteam: "Suspension" },
+                  { name: "Samarth Sakhale", role: "Brakes Head", subteam: "Brakes" },
+                  { name: "Uday Paul George", role: "Chassis Lead", subteam: "Chassis" },
+                  { name: "Prashant Kumar", role: "Steering Lead", subteam: "Steering" },
+                  { name: "Vishavjeet Singh Bhati", role: "Driver & Dynamics", subteam: "Vehicle Dynamics" },
+                ].map((lead, i) => (
+                  <Reveal key={lead.name} delay={i * 0.05}>
+                    <SpotCard className="p-5 border-apex-red/30 bg-apex-red/[0.04]">
+                      <div className="flex items-center gap-2 text-apex-red font-mono text-[10px] uppercase tracking-widest font-semibold mb-2">
+                        <Award size={12} /> {lead.subteam}
+                      </div>
+                      <h4 className="font-display font-semibold text-bone text-lg tracking-tight">{lead.name}</h4>
+                      <p className="text-bone/60 text-xs mt-1">{lead.role}</p>
+                    </SpotCard>
+                  </Reveal>
+                ))}
+              </div>
+            </section>
+
+            {/* BAJA Roster Section */}
+            <section className="space-y-10">
+              <SectionHead
+                n={1}
+                kicker="Subsystem Roster"
+                title="B-26 Engineering *Squad.*"
+                aside={
+                  <Segmented
+                    id="baja-filter"
+                    value={bajaFilter}
+                    onChange={setBajaFilter}
+                    options={[
+                      { key: "all", label: "Everyone", short: "All" },
+                      { key: "leads", label: "Leads Only", short: "Leads" },
+                      { key: "powertrain", label: "Powertrain", short: "Power" },
+                      { key: "suspension", label: "Suspension", short: "Susp" },
+                      { key: "chassis", label: "Chassis" },
+                      { key: "brakes", label: "Brakes" },
+                      { key: "steering", label: "Steering" },
+                      { key: "management", label: "Management", short: "Mgmt" },
+                    ]}
+                  />
+                }
+              />
+              <div key={bajaFilter} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {getFilteredBaja().map((m, i) => (
+                  <MemberCard key={`${m.name}-${m.subteam}-${i}`} m={m} i={i} />
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* ══ 2. OFFICE BEARERS & ORG CHART ════════════════════════════════ */}
+        {activeSegment === "officers" && (
           <div className="space-y-20 animate-fadeIn">
-            {/* ── The crew, for real ── */}
+            {/* The Crew Media */}
             <section className="space-y-10">
               <SectionHead n={0} kicker="The crew" title="Meet us *before* *the* *car.*" />
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -167,67 +234,83 @@ export default function TeamsTab() {
               </div>
             </section>
 
-            {/* ── Org chart ── */}
+            {/* Org Chart */}
             <section className="space-y-10">
-              <SectionHead n={1} kicker="Chain of command" title="Who answers *to* *whom.*" />
+              <SectionHead n={1} kicker="Chain of command" title="Office Bearers & *Council* (2025–2026)" />
               <Reveal className="glass !rounded-[28px] px-5 sm:px-10 py-10 sm:py-14 relative overflow-hidden">
                 <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[70%] h-48 bg-[radial-gradient(ellipse_at_top,rgba(225,6,0,0.18),transparent_70%)]" />
                 <OrgNode label="Faculty advisors" names="Dr. S. Anand Kumar & Dr. Pankaj Kaushik" note="Department of Mechanical Engineering" />
                 <Wire />
-                <OrgNode hot label="Executive board" names={<>Harshit Kumar Mishra <span className="text-bone/40 font-normal">· President</span><br />N M Roshanth <span className="text-bone/40 font-normal">· Vice-President</span></>} note="Chapter operations & strategy" />
+                <OrgNode hot label="Executive Council" names={<>Harshit Mishra <span className="text-bone/40 font-normal">· President</span><br />Ramakrishna Sen <span className="text-bone/40 font-normal">· Vice President</span></>} note="Chapter operations & governance" />
                 <Wire />
                 <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-3xl mx-auto">
                   <div aria-hidden className="hidden md:block absolute left-1/4 right-1/4 -top-px h-px bg-white/15" />
-                  <OrgNode label="Technical division" names="Vineet Sharma" note="Technical head · vehicle dynamics" />
-                  <OrgNode label="Operations & finance" names="Priya Patel" note="Sponsorships & public relations" />
+                  <OrgNode label="Finance & Accounts" names="Vineet Sharma" note="Treasurer · budget & accounts" />
+                  <OrgNode label="Secretariat" names="Pranjal Mishra" note="Secretary · chapter records" />
                 </div>
                 <Wire className="hidden md:block" />
                 <div className="mt-4 md:mt-0 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-4xl mx-auto">
-                  {([["Engineering subsystem leads", LEADS.engineering], ["Management & compliance", LEADS.management]] as const).map(([title, rows]) => (
-                    <div key={title} className="rounded-2xl border border-white/[0.08] bg-black/25 p-5 sm:p-6">
-                      <Label>{title}</Label>
-                      <dl className="mt-3 divide-y divide-white/[0.06]">
-                        {rows.map(([k, v]) => (
-                          <div key={k} className="flex items-baseline justify-between gap-4 py-2.5">
-                            <dt className="text-bone/55 text-sm">{k}</dt>
-                            <dd className="text-bone text-sm font-medium text-right">{v}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </div>
-                  ))}
+                  <div className="rounded-2xl border border-white/[0.08] bg-black/25 p-5 sm:p-6">
+                    <Label>Chapter Chairs</Label>
+                    <dl className="mt-3 divide-y divide-white/[0.06]">
+                      <div className="flex items-baseline justify-between gap-4 py-2.5">
+                        <dt className="text-bone/55 text-sm">Membership Chair</dt>
+                        <dd className="text-bone text-sm font-medium text-right">Shanu Jha</dd>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-4 py-2.5">
+                        <dt className="text-bone/55 text-sm">Publicity Chair</dt>
+                        <dd className="text-bone text-sm font-medium text-right">Jatin Sharma</dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <div className="rounded-2xl border border-white/[0.08] bg-black/25 p-5 sm:p-6">
+                    <Label>Event & Outreach Chairs</Label>
+                    <dl className="mt-3 divide-y divide-white/[0.06]">
+                      <div className="flex items-baseline justify-between gap-4 py-2.5">
+                        <dt className="text-bone/55 text-sm">Reception Chair</dt>
+                        <dd className="text-bone text-sm font-medium text-right">Prashant Kumar</dd>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-4 py-2.5">
+                        <dt className="text-bone/55 text-sm">Program Chair</dt>
+                        <dd className="text-bone text-sm font-medium text-right">Karthikeya</dd>
+                      </div>
+                    </dl>
+                  </div>
                 </div>
               </Reveal>
             </section>
 
-            {/* ── Directory ── */}
+            {/* Directory */}
             <section className="space-y-10">
               <SectionHead
                 n={2}
                 kicker="Directory"
-                title="Faces *on* *the* *roster.*"
+                title="Office Bearers *Roster.*"
                 aside={
                   <Segmented
-                    id="team-filter"
-                    value={activeTab}
-                    onChange={setActiveTab}
+                    id="officer-filter"
+                    value={officerFilter}
+                    onChange={setOfficerFilter}
                     options={[
-                      { key: "all", label: "Everyone", short: "All" },
-                      { key: "faculty", label: "Faculty" },
-                      { key: "leadership", label: "Leadership", short: "Board" },
-                      { key: "technical", label: "Engineering", short: "Eng" },
-                      { key: "management", label: "Management", short: "Mgmt" },
+                      { key: "all", label: "All Officers", short: "All" },
+                      { key: "executive", label: "Executive Council", short: "Exec" },
+                      { key: "chairs", label: "Chairs", short: "Chairs" },
+                      { key: "faculty", label: "Faculty", short: "Faculty" },
                     ]}
                   />
                 }
               />
-              <div key={activeTab} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {getFilteredMembers().map((m, i) => <MemberCard key={`${m.name}-${m.subteam}`} m={m} i={i} />)}
+              <div key={officerFilter} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {getFilteredOfficers().map((m, i) => (
+                  <MemberCard key={`${m.name}-${m.role}`} m={m} i={i} />
+                ))}
               </div>
             </section>
           </div>
-        ) : (
-          /* ── Alumni: a chapter too young to have any — yet ── */
+        )}
+
+        {/* ══ 3. ALUMNI NETWORK ════════════════════════════════════════════ */}
+        {activeSegment === "alumni" && (
           <div className="space-y-12 animate-fadeIn">
             <Reveal className="glass !rounded-[28px] relative overflow-hidden px-6 sm:px-14 py-14 sm:py-20">
               <span aria-hidden className="gloss-text-static [filter:none] pointer-events-none absolute -right-6 -bottom-16 font-display font-semibold leading-none tracking-[-0.08em] text-[18rem] sm:text-[26rem] opacity-[0.06]">0</span>
@@ -236,17 +319,17 @@ export default function TeamsTab() {
                 <span className="gloss-text-static">Zero alumni. </span><span className="font-serif-i gloss-red">For now.</span>
               </h3>
               <p className="mt-6 max-w-xl text-bone/65 text-base sm:text-lg leading-relaxed">
-                The chapter was chartered in 2025. Our first 77 members are still in the workshop building the B-26 — the inaugural alumni graduate in 2027–28.
+                The chapter was chartered in 2025. Our first cohorts are currently designing and manufacturing the B-26 all-terrain vehicle — the inaugural alumni graduate in 2027–28.
               </p>
-              <button onClick={() => setActiveSegment("officers")} className="btn-gloss mt-9 inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white cursor-pointer">
-                Meet the current crew →
+              <button onClick={() => setActiveSegment("baja")} className="btn-gloss mt-9 inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white cursor-pointer">
+                Meet the BAJA crew →
               </button>
             </Reveal>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
               {[
                 { v: "0", l: "Graduated alumni", d: "Inaugural cohort in training" },
                 { v: "2025", l: "Chartered", d: "SAEINDIA collegiate chapter" },
-                { v: "77", l: "Active members", d: "Building the B-26" },
+                { v: "34+", l: "Active members", d: "Building the B-26" },
                 { v: "’27", l: "First graduates", d: "Class of 2027–28" },
               ].map((st, i) => (
                 <Reveal key={st.l} delay={i * 0.06}>
