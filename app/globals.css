@@ -295,7 +295,34 @@ img, video { display: block; max-width: 100%; }
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 30px rgba(0,0,0,0.50);
-  transition: box-shadow 0.3s;
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
+}
+
+.site-header--hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-100%) !important;
+}
+
+/* Hide navigation taskbar and bottom telemetry cluster during 3D cold-open animation */
+body.hero-active .site-header {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-100%) !important;
+}
+
+body.hero-active .mobile-bottom-nav,
+body.hero-active aside[aria-label="Engine sound and telemetry"],
+body.hero-active [data-theme-toggle] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(100%) !important;
+}
+
+body.hero-active button[data-engine-toggle].md\:hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-100%) !important;
 }
 
 /* Red-to-orange accent stripe at very top */

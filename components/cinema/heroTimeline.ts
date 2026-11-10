@@ -12,3 +12,8 @@
 export const HERO = { lights: 1.0, drop: 2.45, impact: 3.0, race: 4.1, rewind: 6.1, end: 8.6 };
 export const LIGHT_STEP = 0.26; // seconds between start lights
 export type HeroClock = { started: boolean; t: number };
+
+export let heroPlayed = false;
+export function setHeroPlayed(v: boolean) {
+  heroPlayed = v;
+}

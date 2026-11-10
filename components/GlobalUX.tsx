@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Bell } from 'lucide-react';
 
-export default function GlobalUX() {
+export default function GlobalUX({ hide = false }: { hide?: boolean }) {
   const [toasts, setToasts] = useState<{ id: number, message: string }[]>([]);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
@@ -47,7 +47,10 @@ export default function GlobalUX() {
       {/* Theme Toggle Button (Fixed bottom-left) */}
       <button 
         onClick={toggleTheme}
-        className="fixed bottom-6 left-6 z-50 w-10 h-10 bg-titanium-700/80 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:border-white/30 transition-all cursor-pointer shadow-lg hidden md:flex"
+        data-theme-toggle
+        className={`fixed bottom-6 left-6 z-50 w-10 h-10 bg-titanium-700/80 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:border-white/30 transition-all duration-500 cursor-pointer shadow-lg hidden md:flex ${
+          hide ? "opacity-0 pointer-events-none translate-y-8" : "opacity-100 translate-y-0"
+        }`}
         title="Toggle Theme"
       >
         {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}

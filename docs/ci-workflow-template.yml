@@ -1,0 +1,50 @@
+name: CI Build & Verify
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-verify:
+    name: Typecheck, Lint & Static Export Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Web Worker
+        run: npm run build:worker
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+      - name: ESLint check
+        run: npm run lint
+
+      - name: Build Next.js static export
+        run: npm run build
+
+      - name: Verify static export output
+        run: |
+          test -f out/index.html || { echo "out/index.html missing"; exit 1; }
+          test -f out/admin.html || { echo "out/admin.html missing"; exit 1; }
+          test -f out/404.html || { echo "out/404.html missing"; exit 1; }
+          test -f out/workers/normals.js || { echo "out/workers/normals.js missing"; exit 1; }
+          echo "Static export artifacts verified successfully."
+

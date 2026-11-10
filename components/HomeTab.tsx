@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import { ArrowUpRight, X } from "lucide-react";
 import { AnimatePresence, animate, motion, useInView, useScroll, useTransform, type MotionValue } from "framer-motion";
 import HeroOverlay from "./cinema/HeroOverlay";
-import { HERO, type HeroClock } from "./cinema/heroTimeline";
+import { HERO, type HeroClock, heroPlayed, setHeroPlayed } from "./cinema/heroTimeline";
 import SceneHUD, { type Scene } from "./cinema/SceneHUD";
 import { CINE_EASE } from "./cinema/primitives";
 import { facultyAdvisors } from "@/data/teamData";
@@ -17,11 +17,9 @@ const Story3D = dynamic(() => import("./cinema/Story3D"), { ssr: false });
 const MODEL_URL = "/assets/b26_draco.glb";
 const MODEL_BYTES = 695824; // decoded size, used when the response is compressed
 
-/* The cold open plays once per page load — not again when you come back to the Home tab. */
-let heroPlayed = false;
-
 interface HomeTabProps {
   switchPage: (tab: string) => void;
+  onHeroDone?: () => void;
 }
 
 const CHAPTERS: Scene[] = [
@@ -252,11 +250,24 @@ const galleryPhotos: PhotoItem[] = [
 ];
 
 
-export default function HomeTab({ switchPage }: HomeTabProps) {
+export default function HomeTab({ switchPage, onHeroDone }: HomeTabProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [stageReady, setStageReady] = useState(false);
   const [heroDone, setHeroDone] = useState(() => heroPlayed);
   const hero = useRef<HeroClock>({ started: heroPlayed, t: heroPlayed ? HERO.end : 0 });
+
+  useEffect(() => {
+    if (!heroDone) {
+      document.body.classList.add("hero-active");
+      window.dispatchEvent(new CustomEvent("sae:hero-status", { detail: { active: true } }));
+    } else {
+      document.body.classList.remove("hero-active");
+      window.dispatchEvent(new CustomEvent("sae:hero-status", { detail: { active: false } }));
+    }
+    return () => {
+      document.body.classList.remove("hero-active");
+    };
+  }, [heroDone]);
   const trackRef = useRef<HTMLDivElement>(null);
   // Loading progress, 0–1: 0–0.8 = model download (real bytes), 0.8–0.95 = decode, 1 = ready.
   const loadRef = useRef(0);
@@ -307,7 +318,8 @@ export default function HomeTab({ switchPage }: HomeTabProps) {
   const onStageReady = useCallback(() => {
     setStageReady(true);
     if (!hero.current.started) {
-      hero.current.started = true; heroPlayed = true;
+      hero.current.started = true;
+      setHeroPlayed(true);
       window.dispatchEvent(new CustomEvent("sae:rev", { detail: { amount: 1, ms: 2800 } })); // ignition: drop + launch
     }
   }, []);
@@ -322,9 +334,12 @@ export default function HomeTab({ switchPage }: HomeTabProps) {
   const skipHero = useCallback(() => {
     hero.current.started = true;
     hero.current.t = HERO.end;
-    heroPlayed = true;
+    setHeroPlayed(true);
     setHeroDone(true);
-  }, []);
+    onHeroDone?.();
+    document.body.classList.remove("hero-active");
+    window.dispatchEvent(new CustomEvent("sae:hero-status", { detail: { active: false } }));
+  }, [onHeroDone]);
 
   // Touch phones: page through the story one chapter per swipe. Any deliberate vertical swipe
   // glides to exactly the next/previous chapter; until that glide (and the car's transformation
@@ -387,12 +402,19 @@ export default function HomeTab({ switchPage }: HomeTabProps) {
     if (heroDone) return;
     let raf = 0;
     const tick = () => {
-      if (hero.current.t >= HERO.end) { heroPlayed = true; setHeroDone(true); return; }
+      if (hero.current.t >= HERO.end) {
+        setHeroPlayed(true);
+        setHeroDone(true);
+        onHeroDone?.();
+        document.body.classList.remove("hero-active");
+        window.dispatchEvent(new CustomEvent("sae:hero-status", { detail: { active: false } }));
+        return;
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [heroDone]);
+  }, [heroDone, onHeroDone]);
 
   // Hold the page still during the intro; any scroll, swipe or key skips straight to the story.
   useEffect(() => {

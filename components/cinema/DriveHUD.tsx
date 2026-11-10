@@ -12,7 +12,7 @@ const IDLE = 1400, REDLINE = 3800;
 const GEARS = [0, 9, 18, 28, 40, 56]; // km/h where each gear starts (1…5)
 const SEGMENTS = 14;
 
-export default function DriveHUD() {
+export default function DriveHUD({ hide = false }: { hide?: boolean }) {
   const speedEl = useRef<HTMLSpanElement>(null);
   const gearEl = useRef<HTMLSpanElement>(null);
   const segs = useRef<HTMLSpanElement[]>([]);
@@ -86,7 +86,12 @@ export default function DriveHUD() {
       </div>
 
       {/* Telemetry cluster (desktop), next to the theme toggle */}
-      <aside aria-label="Engine sound and telemetry" className="hidden md:flex fixed bottom-6 left-[76px] z-40 items-center gap-3 h-10 pl-1.5 pr-4 rounded-full glass !rounded-full select-none">
+      <aside
+        aria-label="Engine sound and telemetry"
+        className={`hidden md:flex fixed bottom-6 left-[76px] z-40 items-center gap-3 h-10 pl-1.5 pr-4 rounded-full glass !rounded-full select-none transition-all duration-500 ${
+          hide ? "opacity-0 pointer-events-none translate-y-8" : "opacity-100 translate-y-0"
+        }`}
+      >
         <button
           onClick={toggle}
         data-engine-toggle
@@ -124,7 +129,9 @@ export default function DriveHUD() {
         data-engine-toggle
         aria-pressed={soundOn}
         aria-label={soundOn ? "Turn engine sound off" : "Turn engine sound on"}
-        className={`md:hidden fixed top-[14px] right-4 z-[51] h-9 pl-3 pr-3.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium cursor-pointer ${soundOn ? "btn-gloss text-white" : "btn-glass text-bone/75"}`}
+        className={`md:hidden fixed top-[14px] right-4 z-[51] h-9 pl-3 pr-3.5 rounded-full flex items-center gap-1.5 text-[11px] font-medium cursor-pointer transition-all duration-500 ${
+          hide ? "opacity-0 pointer-events-none -translate-y-8" : "opacity-100 translate-y-0"
+        } ${soundOn ? "btn-gloss text-white" : "btn-glass text-bone/75"}`}
       >
         {soundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
         <span className="font-mono uppercase tracking-[0.18em] text-[9px]">{soundOn ? "Engine on" : "Sound"}</span>

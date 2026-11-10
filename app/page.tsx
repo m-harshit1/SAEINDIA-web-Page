@@ -8,6 +8,7 @@ import {
 import MagneticButton from "@/components/MagneticButton";
 import { useReducedMotion } from "framer-motion";
 import BuggyCurtain, { type CurtainRun } from "@/components/cinema/BuggyCurtain";
+import { heroPlayed } from "@/components/cinema/heroTimeline";
 
 import dynamic from "next/dynamic";
 import HomeTab     from "@/components/HomeTab";
@@ -56,9 +57,22 @@ export default function SAEIndiaHubContent() {
   const [showScrollTop,  setShowScrollTop]  = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const [curtain,        setCurtain]        = useState<(CurtainRun & { tab: TabId }) | null>(null);
+  const [heroActive,     setHeroActive]     = useState(() => !heroPlayed);
   const reduceMotion = useReducedMotion();
 
   const mainRef        = useRef<HTMLElement>(null);
+
+  /* ── Hero animation state listener ───────────────────────────────── */
+  useEffect(() => {
+    const onHeroStatus = (e: Event) => {
+      const active = (e as CustomEvent<{ active: boolean }>).detail?.active ?? false;
+      setHeroActive(active);
+    };
+    window.addEventListener("sae:hero-status", onHeroStatus);
+    return () => window.removeEventListener("sae:hero-status", onHeroStatus);
+  }, []);
+
+  const hideNav = activeTab === "home" && heroActive;
 
   /* ── Scroll events ───────────────────────────────────────────────── */
   useEffect(() => {
@@ -125,12 +139,12 @@ export default function SAEIndiaHubContent() {
   /* ── Render tab ──────────────────────────────────────────────────── */
   const renderTab = () => {
     switch (activeTab) {
-      case "home":     return <HomeTab     switchPage={navigateTo} />;
+      case "home":     return <HomeTab     switchPage={navigateTo} onHeroDone={() => setHeroActive(false)} />;
       case "projects": return <ProjectsTab />;
       case "teams":    return <TeamsTab    />;
       case "blog":     return <BlogTab     />;
       case "join":     return <JoinTab     />;
-      default:         return <HomeTab     switchPage={navigateTo} />;
+      default:         return <HomeTab     switchPage={navigateTo} onHeroDone={() => setHeroActive(false)} />;
     }
   };
 
@@ -140,7 +154,7 @@ export default function SAEIndiaHubContent() {
       <a href="#main-content" className="skip-link">Skip to content</a>
       {/* ══ HEADER ══════════════════════════════════════════════════════ */}
       <header
-        className={`site-header site-header--overlay ${activeTab !== "home" && headerScrolled ? "site-header--scrolled" : ""}`}
+        className={`site-header site-header--overlay ${hideNav ? "site-header--hidden" : ""} ${activeTab !== "home" && headerScrolled ? "site-header--scrolled" : ""}`}
       >
 
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-4" style={{ height: "68px" }}>
@@ -200,8 +214,8 @@ export default function SAEIndiaHubContent() {
         {renderTab()}
       </main>
 
-      <GlobalUX />
-      <DriveHUD />
+      <GlobalUX hide={hideNav} />
+      <DriveHUD hide={hideNav} />
       <GameLauncher />
       <RevCursor />
       <div aria-hidden className="film-grain" />
@@ -215,7 +229,9 @@ export default function SAEIndiaHubContent() {
 
       {/* ══ MOBILE BOTTOM NAV (iOS-style) ════════════════════════════════ */}
       <nav
-        className="md:hidden fixed inset-x-0 bottom-0 z-40 flex items-stretch"
+        className={`mobile-bottom-nav md:hidden fixed inset-x-0 bottom-0 z-40 flex items-stretch transition-all duration-500 ${
+          hideNav ? "opacity-0 pointer-events-none translate-y-full" : "opacity-100 translate-y-0"
+        }`}
         aria-label="Mobile navigation"
         style={{
           background: "rgba(10,11,13,0.97)",

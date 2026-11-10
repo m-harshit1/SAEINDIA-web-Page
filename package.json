@@ -7,6 +7,9 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test:verify": "npm run build:worker && tsc --noEmit && npm run lint",
+    "deploy:live": "npm run test:verify && npm run build && npx firebase-tools deploy --only hosting",
     "build:worker": "esbuild components/cinema/normals.worker.ts --bundle --minify --format=esm --target=es2020 --outfile=public/workers/normals.js",
     "predev": "npm run build:worker",
     "prebuild": "npm run build:worker"
