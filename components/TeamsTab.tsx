@@ -113,7 +113,6 @@ export default function TeamsTab() {
     const q = memberSearch.toLowerCase();
     return (
       m.name.toLowerCase().includes(q) ||
-      m.degree.toLowerCase().includes(q) ||
       m.graduationYear.includes(q) ||
       m.email.toLowerCase().includes(q)
     );
@@ -478,7 +477,7 @@ export default function TeamsTab() {
                     type="text"
                     value={memberSearch}
                     onChange={(e) => setMemberSearch(e.target.value)}
-                    placeholder="Search name, branch, year…"
+                    placeholder="Search name, class year…"
                     className="w-full bg-transparent text-sm text-bone placeholder:text-bone/30 focus:outline-none"
                   />
                 </div>
@@ -502,18 +501,16 @@ export default function TeamsTab() {
                 {filteredMembers.map((m, i) => (
                   <div
                     key={`${m.email}-${i}`}
-                    className="rounded-2xl border border-white/[0.07] bg-black/30 hover:bg-white/[0.04] p-4 flex items-center gap-3.5 transition-colors"
+                    className="rounded-2xl border border-white/[0.07] bg-black/30 hover:bg-white/[0.04] p-4 flex items-center justify-between gap-3.5 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 grid place-items-center font-display font-semibold text-bone text-xs shrink-0">
-                      {m.initials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-display font-medium text-bone text-sm truncate tracking-tight">{m.name}</p>
-                      <p className="text-bone/50 text-xs truncate mt-0.5">{m.degree}</p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-bone/40 block">Class</span>
-                      <span className="font-mono text-xs text-[#FF5A3C] font-semibold">{m.graduationYear}</span>
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 grid place-items-center font-display font-semibold text-bone text-xs shrink-0">
+                        {m.initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-display font-medium text-bone text-sm truncate tracking-tight">{m.name}</p>
+                        <p className="text-[#FF5A3C] font-mono text-xs mt-0.5 font-medium">Class of {m.graduationYear}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
