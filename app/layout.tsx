@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Inter, JetBrains_Mono, Inter_Tight, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
@@ -88,8 +89,21 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-carbon-900 text-alloy-100 selection:bg-apex-red selection:text-white">
         <SmoothScroll />
         <ScrollProgressBar />
-        {/* Analytics: the old tag used a placeholder ID ("G-SAEINDIA26") and only cost 430 KB of
-            script. Add a real GA4 measurement ID here (with strategy="lazyOnload") when there is one. */}
+        {/* Google Analytics (GA4) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-3NVZZZGFEF"
+          strategy="lazyOnload"
+        />
+        <Script id="google-analytics" strategy="lazyOnload">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-3NVZZZGFEF', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
         <Providers>
           {children}
         </Providers>
