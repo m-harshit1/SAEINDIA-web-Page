@@ -177,7 +177,7 @@ export default function VehicleView3D() {
             SolidWorks AP203 CAD Online
           </span>
           <span>Mesh Faces: 910,449 Polygons (High-Contrast CAD Assembly)</span>
-          <span>Source: BAJA_FULL_ASSEMBB;Y.STEP (257 MB)</span>
+          <span>Source: BAJA_FULL_ASSEMBLY.STEP (257 MB)</span>
         </div>
       </div>
 

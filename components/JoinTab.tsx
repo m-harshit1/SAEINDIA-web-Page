@@ -174,6 +174,7 @@ export default function JoinTab() {
   const [applicantSecondaryDomain, setApplicantSecondaryDomain] = useState<string>("Suspension, Steering & Wheel Kinematics");
   const [applicantCoverText, setApplicantCoverText] = useState<string>("");
   const [applicationSubmitted, setApplicationSubmitted] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [assignedReference, setAssignedReference] = useState<string>("");
 
   // Sponsor State - selected tier
@@ -185,10 +186,11 @@ export default function JoinTab() {
 
   const handleApplicationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!applicantName.trim()) return;
+    if (!applicantName.trim() || isSubmitting) return;
 
+    setIsSubmitting(true);
     // Applications go straight to Firestore; rules allow create-only, with field validation.
-    const referenceCode = `BAJA-APP-2026-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    const referenceCode = `BAJA-APP-2027-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     const clip = (v: string, n: number) => (v || '').toString().trim().slice(0, n);
     try {
       await addDoc(collection(db, 'applications'), {
@@ -210,6 +212,8 @@ export default function JoinTab() {
     } catch (error) {
       console.error('Error submitting application form:', error);
       alert('Could not submit your application. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -431,8 +435,8 @@ export default function JoinTab() {
                         </Field>
                         <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
                           <p className="text-bone/40 text-[13px]">Goes straight to the selection board. We reply within a week.</p>
-                          <button type="submit" className="btn-gloss shrink-0 inline-flex items-center justify-center gap-2 rounded-full px-7 py-4 text-sm font-semibold text-white cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]">
-                            <Send size={15} /> Submit application
+                          <button type="submit" disabled={isSubmitting} className="btn-gloss shrink-0 inline-flex items-center justify-center gap-2 rounded-full px-7 py-4 text-sm font-semibold text-white cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                            <Send size={15} /> {isSubmitting ? "Submitting…" : "Submit application"}
                           </button>
                         </div>
                       </form>

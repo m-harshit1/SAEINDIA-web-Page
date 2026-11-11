@@ -304,7 +304,13 @@ export default function SAEIndiaHubContent() {
 
       {/* ══ SCROLL-TO-TOP ════════════════════════════════════════════════ */}
       <button
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        onClick={() => {
+          if (window.__lenis) {
+            window.__lenis.scrollTo(0, { duration: 1.0 });
+          } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        }}
         className={`scroll-top-btn ${showScrollTop ? "visible" : ""}`}
         aria-label="Scroll to top"
         title="Back to top"

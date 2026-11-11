@@ -127,7 +127,7 @@ export default function TeamsTab() {
     switch (bajaFilter) {
       case "leads": return bajaTeam.filter(m => m.isLead);
       case "powertrain": return bajaTeam.filter(m => m.subteam === "Powertrain");
-      case "suspension": return bajaTeam.filter(m => m.subteam === "Suspension");
+      case "suspension": return bajaTeam.filter(m => m.subteam === "Suspension" || m.subteam === "Vehicle Dynamics");
       case "chassis": return bajaTeam.filter(m => m.subteam === "Chassis");
       case "brakes": return bajaTeam.filter(m => m.subteam === "Brakes");
       case "steering": return bajaTeam.filter(m => m.subteam === "Steering");
@@ -164,7 +164,7 @@ export default function TeamsTab() {
         stats={[
           { value: "8", label: "Office Bearers" },
           { value: "34", label: "BAJA Crew" },
-          { value: "77", label: "SAE Members" },
+          { value: String(saeChapterMembers.length), label: "SAE Members" },
           { value: "2", label: "Faculty Mentors" },
         ]}
       />
@@ -489,7 +489,7 @@ export default function TeamsTab() {
                       { key: "all", label: "Everyone", short: "All" },
                       { key: "leads", label: "Leads Only", short: "Leads" },
                       { key: "powertrain", label: "Powertrain", short: "Power" },
-                      { key: "suspension", label: "Suspension", short: "Susp" },
+                      { key: "suspension", label: "Suspension & Dynamics", short: "Susp" },
                       { key: "chassis", label: "Chassis" },
                       { key: "brakes", label: "Brakes" },
                       { key: "steering", label: "Steering" },
@@ -536,7 +536,7 @@ export default function TeamsTab() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/10 px-3 py-1 font-mono text-[11px] text-bone/70">
-                    <UserCheck size={13} className="text-[#FF5A3C]" /> 77 Active Members
+                    <UserCheck size={13} className="text-[#FF5A3C]" /> {saeChapterMembers.length} Active Members
                   </span>
                 </div>
               </div>

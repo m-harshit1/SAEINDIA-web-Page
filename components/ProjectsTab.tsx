@@ -218,7 +218,7 @@ export default function ProjectsTab() {
   const wheelTorqueNm = interpolatedTorque * totalReduction * 0.95; // 95% driveline efficiency
 
   const currentSpec = specHotspots[activeHotspot as keyof typeof specHotspots] || specHotspots.dimensions;
-  const currentAchievement = achievementsData[selectedYear] || achievementsData["2026"];
+  const currentAchievement = achievementsData[selectedYear] || achievementsData["2027"];
 
   const showActive = selectedCategory === "All" || selectedCategory === "Active";
   const showResearch = selectedCategory === "All" || selectedCategory === "Research";

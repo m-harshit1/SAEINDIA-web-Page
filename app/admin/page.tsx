@@ -6,8 +6,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut, type User } from "firebase/auth";
-import { collection, deleteDoc, doc, getDocs, limit, orderBy, query, updateDoc, type Timestamp } from "firebase/firestore";
-import { Download, LogOut, RefreshCw, Search, Trash2, X } from "lucide-react";
+import { addDoc, collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, type Timestamp } from "firebase/firestore";
+import { Download, LogOut, Plus, RefreshCw, Search, Send, Trash2, X } from "lucide-react";
 import { app, db } from "@/lib/firebase";
 import { Label } from "@/components/cinema/PageKit";
 
@@ -89,6 +89,244 @@ function LapsPanel() {
               ))}
             </ul>
           )}
+      </div>
+    </section>
+  );
+}
+
+/* Blog Bulletins Desk: publish official announcements and news updates */
+interface AdminBlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  author: string;
+  date: string;
+  readTime: string;
+  createdAt?: Timestamp;
+}
+
+const BLOG_CATEGORIES = ["Announcements", "Testing", "AWIM Outreach", "Competitions"] as const;
+
+function BlogAdminPanel() {
+  const [posts, setPosts] = useState<AdminBlogPost[] | null>(null);
+  const [err, setErr] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Form fields
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<string>("Announcements");
+  const [author, setAuthor] = useState("SAE Executive Council");
+  const [excerpt, setExcerpt] = useState("");
+  const [content, setContent] = useState("");
+  const [readTime, setReadTime] = useState("3 min read");
+
+  const load = useCallback(async () => {
+    try {
+      const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
+      setPosts(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as AdminBlogPost));
+      setErr("");
+    } catch {
+      setErr("Couldn't load bulletins.");
+      setPosts([]);
+    }
+  }, []);
+
+  useEffect(() => { const t = setTimeout(load, 0); return () => clearTimeout(t); }, [load]);
+
+  const remove = async (p: AdminBlogPost) => {
+    if (!window.confirm(`Delete bulletin "${p.title}"? This cannot be undone.`)) return;
+    try {
+      await deleteDoc(doc(db, "posts", p.id));
+      setPosts((xs) => (xs ?? []).filter((x) => x.id !== p.id));
+    } catch {
+      setErr("Couldn't delete bulletin.");
+    }
+  };
+
+  const submitPost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !content.trim() || submitting) return;
+    setSubmitting(true);
+    setErr("");
+    try {
+      const dateStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      await addDoc(collection(db, "posts"), {
+        title: title.trim().slice(0, 200),
+        category,
+        author: author.trim() || "SAE Executive Council",
+        excerpt: (excerpt.trim() || title.trim()).slice(0, 500),
+        content: content.trim().slice(0, 20000),
+        readTime: readTime.trim() || "3 min read",
+        date: dateStr,
+        createdAt: serverTimestamp(),
+      });
+      setTitle("");
+      setExcerpt("");
+      setContent("");
+      setShowAdd(false);
+      load();
+    } catch (e) {
+      console.error(e);
+      setErr("Failed to publish bulletin. Make sure you have admin permissions in firestore.rules.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="pt-10">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <Label className="text-[#FF5A3C]/90">Chapter Journalism</Label>
+          <h2 className="mt-2 font-display font-semibold tracking-[-0.04em] text-3xl">Blog & Bulletins <span className="font-serif-i gloss-red">publishing.</span></h2>
+          <p className="mt-1 text-bone/50 text-sm">Publish updates to the public Blog tab and archive.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAdd((v) => !v)}
+            className="btn-gloss rounded-full px-4 py-2 text-sm text-white font-medium inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus size={15} /> {showAdd ? "Close form" : "New Bulletin"}
+          </button>
+          <button onClick={load} title="Refresh bulletins" className="btn-glass w-10 h-10 rounded-full grid place-items-center cursor-pointer">
+            <RefreshCw size={15} />
+          </button>
+        </div>
+      </div>
+
+      {err && <p className="mt-3 text-[14px] text-[#FF7A5C]">{err}</p>}
+
+      {/* New Bulletin Composer */}
+      {showAdd && (
+        <form onSubmit={submitPost} className="mt-6 glass !rounded-[24px] p-6 space-y-5 animate-fadeIn">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
+              <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-bone/60 mb-2">Title</label>
+              <input
+                required
+                maxLength={200}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Virtual Round Results: Rank 12 Nationwide"
+                className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-2.5 text-sm text-bone focus:outline-none focus:border-apex-red/60"
+              />
+            </div>
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-bone/60 mb-2">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-2.5 text-sm text-bone focus:outline-none focus:border-apex-red/60"
+              >
+                {BLOG_CATEGORIES.map((c) => (
+                  <option key={c} value={c} className="bg-[#121214] text-bone">{c}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-bone/60 mb-2">Author</label>
+              <input
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="SAE Executive Council"
+                className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-2.5 text-sm text-bone focus:outline-none focus:border-apex-red/60"
+              />
+            </div>
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-bone/60 mb-2">Read Time</label>
+              <input
+                value={readTime}
+                onChange={(e) => setReadTime(e.target.value)}
+                placeholder="3 min read"
+                className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-2.5 text-sm text-bone focus:outline-none focus:border-apex-red/60"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-bone/60 mb-2">Short Excerpt (Summary)</label>
+            <input
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              placeholder="1–2 punchy sentences summarizing the announcement"
+              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-2.5 text-sm text-bone focus:outline-none focus:border-apex-red/60"
+            />
+          </div>
+
+          <div>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-bone/60 mb-2">Content (Article Body)</label>
+            <textarea
+              required
+              rows={6}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Full article body. Paragraphs will be cleanly displayed to readers."
+              className="w-full rounded-xl bg-black/40 border border-white/10 px-4 py-3 text-sm text-bone focus:outline-none focus:border-apex-red/60 resize-y"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAdd(false)}
+              className="btn-glass rounded-full px-5 py-2.5 text-sm text-bone/70 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn-gloss rounded-full px-6 py-2.5 text-sm font-semibold text-white inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <Send size={14} /> {submitting ? "Publishing…" : "Publish to Blog"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Bulletins Feed List */}
+      <div className="mt-4 glass !rounded-[24px] overflow-hidden">
+        {posts == null ? (
+          <p className="px-6 py-10 text-center text-bone/45">Loading bulletins…</p>
+        ) : !posts.length ? (
+          <div className="px-6 py-10 text-center text-bone/45">
+            <p>No custom bulletins published to Firestore yet.</p>
+            <p className="text-xs text-bone/30 mt-1">Default seed posts continue to be served from posts.json.</p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-white/[0.06]">
+            {posts.map((p) => (
+              <li key={p.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 sm:px-6 py-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block rounded-full px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-wider bg-white/[0.06] border border-white/10 text-[#FF5A3C]">
+                      {p.category}
+                    </span>
+                    <span className="text-bone/40 text-xs">{p.date} · {p.readTime}</span>
+                  </div>
+                  <h4 className="mt-1 font-display font-medium text-bone text-base tracking-tight truncate">{p.title}</h4>
+                  <p className="mt-0.5 text-bone/50 text-xs truncate max-w-xl">{p.excerpt || p.content}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="font-mono text-xs text-bone/40">{p.author}</span>
+                  <button
+                    onClick={() => remove(p)}
+                    aria-label={`Delete ${p.title}`}
+                    className="btn-glass w-9 h-9 rounded-full grid place-items-center cursor-pointer text-bone/60 hover:text-[#FF7A5C]"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );
@@ -264,6 +502,7 @@ export default function AdminPage() {
         </div>
         <p className="text-bone/30 text-[12px]">{shown.length} of {apps.length} applications</p>
 
+        <BlogAdminPanel />
         <LapsPanel />
       </div>
 

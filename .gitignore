@@ -49,6 +49,7 @@ sae-web-page.zip
 
 # Playwright MCP test artifacts
 /.playwright-mcp
+.chrome-temp/
 
 # Firebase / static export
 /out
