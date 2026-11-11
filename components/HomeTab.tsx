@@ -341,6 +341,17 @@ export default function HomeTab({ switchPage, onHeroDone }: HomeTabProps) {
     window.dispatchEvent(new CustomEvent("sae:hero-status", { detail: { active: false } }));
   }, [onHeroDone]);
 
+  // Network watchdog: if 3D takes > 4.5s on slow mobile networks, smoothly proceed to the page
+  useEffect(() => {
+    if (heroDone) return;
+    const timeout = setTimeout(() => {
+      if (!stageReady) {
+        skipHero();
+      }
+    }, 4500);
+    return () => clearTimeout(timeout);
+  }, [heroDone, stageReady, skipHero]);
+
   // Touch phones: page through the story one chapter per swipe. Any deliberate vertical swipe
   // glides to exactly the next/previous chapter; until that glide (and the car's transformation
   // during it) finishes, further swipes are ignored — so text never sits half-scrolled.
@@ -477,8 +488,7 @@ export default function HomeTab({ switchPage, onHeroDone }: HomeTabProps) {
 
       {heroDone && <SceneHUD scenes={CHAPTERS} />}
 
-      {heroDone && (
-      <div ref={trackRef} className="relative z-10">
+      <div ref={trackRef} className={`relative z-10 transition-opacity duration-700 ${heroDone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
         {/* ── 01 · The idea ─────────────────────────────── */}
         <Chapter id="ch-idea" n={1} side="left" first>
           <motion.p
@@ -615,7 +625,6 @@ export default function HomeTab({ switchPage, onHeroDone }: HomeTabProps) {
           </p>
         </Chapter>
       </div>
-      )}
 
       {/* Full screen Lightbox viewer for Photos */}
       {selectedPhotoIndex !== null && galleryPhotos[selectedPhotoIndex] && (

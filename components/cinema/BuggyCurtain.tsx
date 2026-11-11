@@ -5,9 +5,9 @@ import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 
 export interface CurtainRun { id: number; label: string; color: string }
 
-const CLOSE_S = 0.5;
-const HOLD_S = 0.16;
-const OPEN_S = 1.6; // slow enough to actually watch the buggy
+const CLOSE_S = 0.28;
+const HOLD_S = 0.08;
+const OPEN_S = 0.72; // quick, high-speed buggy sprint across the screen
 /** Buggy length: a real hero on every screen — ~a third of desktop, ~60% of a phone. */
 const buggyWidth = (W: number) => Math.round(Math.min(460, Math.max(220, W < 768 ? W * 0.6 : W * 0.32)));
 
@@ -48,7 +48,7 @@ export default function BuggyCurtain({
     cover.set(0); seam.set(-1); textOpacity.set(0);
     (async () => {
       // 1 · draw closed
-      animate(textOpacity, 1, { duration: 0.3, delay: 0.2 });
+      animate(textOpacity, 1, { duration: 0.16, delay: 0.08 });
       await animate(cover, 1, { duration: CLOSE_S, ease: [0.76, 0, 0.24, 1] });
       if (cancelled) return;
       // 2 · swap the page behind the curtain, give it a moment to paint
@@ -57,7 +57,7 @@ export default function BuggyCurtain({
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null))));
       if (cancelled) return;
       // 3 · the buggy races along the edge and drives the curtain back
-      animate(textOpacity, 0, { duration: 0.25 });
+      animate(textOpacity, 0, { duration: 0.15 });
       seam.set(0);
       window.dispatchEvent(new CustomEvent("sae:rev", { detail: { amount: 0.85, ms: OPEN_S * 1000 } })); // the buggy floors it
       await animate(seam, L + bw.get() * 0.9, { duration: OPEN_S, ease: [0.35, 0, 0.3, 1] });

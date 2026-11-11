@@ -86,13 +86,13 @@ export default function SAEIndiaHubContent() {
 
   /* ── Prefetch the other tabs once the page has settled ───────────── */
   useEffect(() => {
-    // Wait until the cold open has the network to itself, then fetch when the browser is idle.
+    // Fetch remaining tab bundles during idle time soon after load
     const prefetch = () => { loadProjects(); loadTeams(); loadBlog(); loadJoin(); };
     let idleId = 0;
     const t = setTimeout(() => {
-      if (typeof window.requestIdleCallback === "function") idleId = window.requestIdleCallback(prefetch, { timeout: 4000 });
-      else prefetch(); // Safari has no requestIdleCallback
-    }, 6000);
+      if (typeof window.requestIdleCallback === "function") idleId = window.requestIdleCallback(prefetch, { timeout: 2500 });
+      else prefetch();
+    }, 1200);
     return () => { clearTimeout(t); if (idleId) window.cancelIdleCallback(idleId); };
   }, []);
 
@@ -225,6 +225,12 @@ export default function SAEIndiaHubContent() {
               <MagneticButton
                 key={item.id}
                 id={`nav-${item.id}`}
+                onMouseEnter={() => {
+                  if (item.id === "projects") loadProjects();
+                  else if (item.id === "teams") loadTeams();
+                  else if (item.id === "blog") loadBlog();
+                  else if (item.id === "join") loadJoin();
+                }}
                 onClick={() => navigateTo(item.id)}
                 className={`tab-pill whitespace-nowrap shrink-0 ${activeTab === item.id ? "active" : ""}`}
                 style={activeTab === item.id ? { ["--tab-color" as string]: item.color } : {}}

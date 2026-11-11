@@ -13,8 +13,10 @@ export default function SmoothScroll() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const lenis = new Lenis({
-      lerp: 0.085, // long, fluid glide
+      lerp: 0.1, // responsive yet buttery fluid glide
       smoothWheel: true,
+      wheelMultiplier: 1.05,
+      touchMultiplier: 1.15,
     });
     window.__lenis = lenis;
 

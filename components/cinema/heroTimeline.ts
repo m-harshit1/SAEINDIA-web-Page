@@ -9,11 +9,14 @@
  *   race    chase shot, speedo
  *   rewind  car bursts into particles → "starts as a story"
  *   end     hand over to the scroll story                                                  */
-export const HERO = { lights: 1.0, drop: 2.45, impact: 3.0, race: 4.1, rewind: 6.1, end: 8.6 };
-export const LIGHT_STEP = 0.26; // seconds between start lights
+export const HERO = { lights: 0.8, drop: 2.0, impact: 2.5, race: 3.4, rewind: 5.0, end: 6.8 };
+export const LIGHT_STEP = 0.22; // seconds between start lights
 export type HeroClock = { started: boolean; t: number };
 
-export let heroPlayed = false;
+export let heroPlayed = typeof window !== "undefined" && Boolean(sessionStorage.getItem("sae_hero_seen"));
 export function setHeroPlayed(v: boolean) {
   heroPlayed = v;
+  if (v && typeof window !== "undefined") {
+    try { sessionStorage.setItem("sae_hero_seen", "1"); } catch {}
+  }
 }

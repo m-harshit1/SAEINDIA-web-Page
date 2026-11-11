@@ -86,6 +86,11 @@ export default function RootLayout({
       lang="en"
       className={`h-full antialiased ${inter.variable} ${jetbrainsMono.variable} ${interTight.variable} ${instrumentSerif.variable}`}
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+      </head>
       <body className="min-h-full flex flex-col bg-carbon-900 text-alloy-100 selection:bg-apex-red selection:text-white">
         <SmoothScroll />
         <ScrollProgressBar />
