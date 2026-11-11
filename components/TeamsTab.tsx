@@ -120,18 +120,6 @@ export default function TeamsTab() {
       url.searchParams.set("tab", "teams");
       url.searchParams.set("section", seg);
       window.history.pushState({ tab: "teams", section: seg }, "", url.toString());
-
-      // Anchor scroll so user is never thrown down to the bottom
-      if (segContainerRef.current) {
-        const segTop = segContainerRef.current.getBoundingClientRect().top + window.scrollY - 70;
-        if (window.scrollY > segTop) {
-          if (window.__lenis) {
-            window.__lenis.scrollTo(segTop, { immediate: true });
-          } else {
-            window.scrollTo({ top: segTop, behavior: "instant" });
-          }
-        }
-      }
     }
   };
 
@@ -402,9 +390,9 @@ export default function TeamsTab() {
                   />
                 }
               />
-              <div key={officerFilter} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-h-[380px]">
                 {getFilteredOfficers().map((m, i) => (
-                  <MemberCard key={`${m.name}-${m.role}-${i}`} m={m} i={i} />
+                  <MemberCard key={`${m.name}-${m.role}`} m={m} i={i} />
                 ))}
               </div>
             </section>
@@ -510,9 +498,9 @@ export default function TeamsTab() {
                   />
                 }
               />
-              <div key={bajaFilter} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-h-[420px]">
                 {getFilteredBaja().map((m, i) => (
-                  <MemberCard key={`${m.name}-${m.subteam}-${i}`} m={m} i={i} />
+                  <MemberCard key={`${m.name}-${m.subteam}`} m={m} i={i} />
                 ))}
               </div>
             </section>

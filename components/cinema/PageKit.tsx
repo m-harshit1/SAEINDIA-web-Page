@@ -171,10 +171,14 @@ export function Segmented<K extends string>({
           const on = o.key === value;
           return (
             <button
+              type="button"
               key={o.key}
               role="tab"
               aria-selected={on}
-              onClick={() => onChange(o.key)}
+              onClick={(e) => {
+                e.preventDefault();
+                onChange(o.key);
+              }}
               className={`relative shrink-0 whitespace-nowrap rounded-full px-4 sm:px-5 py-2.5 text-[13px] sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
                 on
                   ? "btn-gloss text-white shadow-lg shadow-apex-red/35 scale-[1.01]"

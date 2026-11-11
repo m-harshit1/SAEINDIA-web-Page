@@ -441,7 +441,7 @@ export default function ProjectsTab() {
                     );
                   })}
                 </div>
-                <div key={activeHotspot} className="lg:col-span-8 glass p-6 sm:p-8 animate-fadeIn">
+                <div className="lg:col-span-8 glass p-6 sm:p-8 min-h-[380px]">
                   <div className="flex items-baseline justify-between gap-4 pb-5 border-b border-white/[0.07]">
                     <div>
                       <h3 className="font-display font-semibold text-white text-2xl sm:text-3xl tracking-[-0.04em]">{currentSpec.title}</h3>
@@ -549,7 +549,7 @@ export default function ProjectsTab() {
               </div>
 
               {/* Year detail */}
-              <div key={selectedYear} className="lg:col-span-8 glass p-6 sm:p-8 space-y-8 animate-fadeIn">
+              <div className="lg:col-span-8 glass p-6 sm:p-8 space-y-8 min-h-[460px]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Label className="text-[#FF5A3C]/80">{currentAchievement.year} · {currentAchievement.status}</Label>

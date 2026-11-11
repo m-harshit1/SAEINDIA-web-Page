@@ -176,7 +176,7 @@ export default function BlogTab() {
             <p className="mt-2 text-bone/45 text-sm">Try another word or category.</p>
           </div>
         ) : (
-          <div key={selectedCategory + q} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 min-h-[400px]">
             {/* Lead story */}
             <Reveal className="md:col-span-2 lg:col-span-2 lg:row-span-2">
               <SpotCard as="button" onClick={() => openPost(lead)} className="group w-full h-full min-h-[360px] lg:min-h-[480px] p-7 sm:p-10 flex flex-col justify-between">
