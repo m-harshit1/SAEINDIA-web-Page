@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, X, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,19 +46,88 @@ export default function BlogTab() {
     return () => { alive = false; };
   }, []);
 
+  const closePost = useCallback((fromBack: boolean = false) => {
+    setActivePost(null);
+    if (typeof window !== "undefined" && !fromBack) {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("post")) {
+        url.searchParams.delete("post");
+        if (window.history.state && window.history.state.post) {
+          window.history.back();
+        } else {
+          window.history.replaceState({ tab: "blog" }, "", url.toString());
+        }
+      }
+    }
+  }, []);
+
+  const openPost = (post: BlogPost) => {
+    setActivePost(post);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "blog");
+      url.searchParams.set("post", String(post.id));
+      window.history.pushState({ tab: "blog", post: String(post.id) }, "", url.toString());
+    }
+  };
+
   // Lock page scroll behind the open article.
   useEffect(() => {
     if (!activePost) return;
     window.__lenis?.stop();
     document.documentElement.style.overflow = 'hidden';
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setActivePost(null); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closePost(); };
     window.addEventListener('keydown', onKey);
     return () => {
       window.__lenis?.start();
       document.documentElement.style.overflow = '';
       window.removeEventListener('keydown', onKey);
     };
-  }, [activePost]);
+  }, [activePost, closePost]);
+
+  // Initialize post & category from URL query parameters (?tab=blog&post=...&category=...)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get("post");
+    if (postId && posts.length) {
+      const found = posts.find((p) => String(p.id) === postId);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (found) setActivePost(found);
+    }
+    const cat = params.get("category") as Cat | null;
+    if (cat && CATEGORIES.includes(cat)) setSelectedCategory(cat);
+  }, [posts]);
+
+  // Listen to browser Back/Forward (popstate) to close reader modal or update filters without exiting site
+  useEffect(() => {
+    const handlePop = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") !== "blog") return;
+      const postId = params.get("post");
+      if (!postId) {
+        setActivePost(null);
+      } else {
+        const found = posts.find((p) => String(p.id) === postId);
+        if (found) setActivePost(found);
+      }
+      const cat = params.get("category") as Cat | null;
+      if (cat && CATEGORIES.includes(cat)) setSelectedCategory(cat);
+    };
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, [posts]);
+
+  const handleCategoryChange = (cat: Cat) => {
+    setSelectedCategory(cat);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "blog");
+      if (cat === "All") url.searchParams.delete("category");
+      else url.searchParams.set("category", cat);
+      window.history.replaceState({ tab: "blog", category: cat }, "", url.toString());
+    }
+  };
 
   const q = searchQuery.toLowerCase();
   const filtered = posts.filter(post => {
@@ -96,7 +165,7 @@ export default function BlogTab() {
           <Segmented
             id="blog-cat"
             value={selectedCategory}
-            onChange={setSelectedCategory}
+            onChange={handleCategoryChange}
             options={CATEGORIES.map((c) => ({ key: c, label: c, short: c === "AWIM Outreach" ? "AWIM" : c === "Announcements" ? "News" : undefined }))}
           />
         </div>
@@ -110,7 +179,7 @@ export default function BlogTab() {
           <div key={selectedCategory + q} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {/* Lead story */}
             <Reveal className="md:col-span-2 lg:col-span-2 lg:row-span-2">
-              <SpotCard as="button" onClick={() => setActivePost(lead)} className="group w-full h-full min-h-[360px] lg:min-h-[480px] p-7 sm:p-10 flex flex-col justify-between">
+              <SpotCard as="button" onClick={() => openPost(lead)} className="group w-full h-full min-h-[360px] lg:min-h-[480px] p-7 sm:p-10 flex flex-col justify-between">
                 <div aria-hidden className="pointer-events-none absolute -right-20 -top-24 w-[480px] h-[480px] rounded-full bg-[radial-gradient(circle,rgba(225,6,0,0.2),transparent_65%)]" />
                 <div className="flex items-center justify-between gap-4">
                   <span className="inline-flex items-center gap-2 rounded-full bg-apex-red/15 border border-apex-red/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.25em] text-[#FF5A3C]">
@@ -131,7 +200,7 @@ export default function BlogTab() {
 
             {rest.map((post, i) => (
               <Reveal key={post.id} delay={Math.min(i, 5) * 0.06} className="h-full">
-                <SpotCard as="button" onClick={() => setActivePost(post)} className="group w-full h-full p-6 sm:p-7 flex flex-col">
+                <SpotCard as="button" onClick={() => openPost(post)} className="group w-full h-full p-6 sm:p-7 flex flex-col">
                   <div className="flex items-center justify-between gap-3">
                     <Label className="text-[#FF5A3C]/90">{post.category}</Label>
                     <Label>{post.readTime}</Label>
@@ -159,7 +228,7 @@ export default function BlogTab() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex justify-center items-end sm:items-center sm:p-8"
-            onClick={() => setActivePost(null)}
+            onClick={() => closePost()}
           >
             <motion.article
               initial={{ y: 60, opacity: 0 }}
@@ -172,7 +241,7 @@ export default function BlogTab() {
             >
               <div className="sticky top-0 z-10 flex items-center justify-between px-6 sm:px-10 py-4 bg-[#0b0b0d]/85 backdrop-blur-md border-b border-white/[0.06]">
                 <Label className="text-[#FF5A3C]/90">{activePost.category}</Label>
-                <button onClick={() => setActivePost(null)} aria-label="Close" className="btn-glass w-9 h-9 rounded-full grid place-items-center text-bone/70 hover:text-bone cursor-pointer">
+                <button onClick={() => closePost()} aria-label="Close" className="btn-glass w-9 h-9 rounded-full grid place-items-center text-bone/70 hover:text-bone cursor-pointer">
                   <X size={16} />
                 </button>
               </div>

@@ -9,7 +9,7 @@ service cloud.firestore {
 
     function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
     function emailLower() { return request.auth.token.email.lower(); }
-    function isAdmin()  { return signedIn() && emailLower() in ['mrpjpandey@gmail.com', 'mishraharshit664@gmail.com']; }
+    function isAdmin()  { return signedIn() && emailLower() in ['saeindia@iiitk.ac.in']; }
     function isMember() { return signedIn() && (emailLower().matches('.*@iiitk[.]ac[.]in$') || isAdmin()); }
     function text(v, max) { return v is string && v.size() <= max; }
     function nonEmpty(v, max) { return text(v, max) && v.size() > 0; }

@@ -96,7 +96,7 @@ export default function SAEIndiaHubContent() {
     return () => { clearTimeout(t); if (idleId) window.cancelIdleCallback(idleId); };
   }, []);
 
-  /* ── Tab navigation with transition ─────────────────────────────── */
+  /* ── Tab navigation with transition and browser history ────────── */
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -109,20 +109,54 @@ export default function SAEIndiaHubContent() {
     }
   }, []);
 
+  // Browser Back & Forward (popstate) listener: keeps route history and stops site exit
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = (params.get("tab") as TabId | null) || "home";
+      if (navItems.some(n => n.id === tabParam)) {
+        setActiveTab(tabParam);
+        if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
+        else window.scrollTo({ top: 0, behavior: "instant" });
+      } else {
+        setActiveTab("home");
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   // Swap the visible tab (runs behind the curtain once it's fully closed).
-  const commitTab = useCallback((t: TabId) => {
+  const commitTab = useCallback((t: TabId, pushHistory: boolean = true) => {
     setActiveTab(t);
     if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
     else window.scrollTo({ top: 0, behavior: "instant" });
     const url = new URL(window.location.href);
-    url.searchParams.set("tab", t);
-    window.history.replaceState(null, "", url.toString());
+    if (t === "home") {
+      url.searchParams.delete("tab");
+    } else {
+      url.searchParams.set("tab", t);
+    }
+    // Clean up sub-view params from previous tab
+    url.searchParams.delete("project");
+    url.searchParams.delete("sub");
+    url.searchParams.delete("year");
+    url.searchParams.delete("spec");
+    url.searchParams.delete("section");
+    url.searchParams.delete("post");
+    url.searchParams.delete("category");
+
+    if (pushHistory) {
+      window.history.pushState({ tab: t }, "", url.toString());
+    } else {
+      window.history.replaceState({ tab: t }, "", url.toString());
+    }
   }, []);
 
-  const navigateTo = useCallback((tab: string) => {
+  const navigateTo = useCallback((tab: string, pushHistory: boolean = true) => {
     const t = tab as TabId;
     if (t === activeTab || transitioning) return;
-    if (reduceMotion) { commitTab(t); return; }
+    if (reduceMotion) { commitTab(t, pushHistory); return; }
     // The curtain closes, we swap the tab behind it, then the buggy drives it open.
     const item = navItems.find(n => n.id === t);
     setTransitioning(true);

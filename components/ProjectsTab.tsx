@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ArrowUpRight, Flag, Mail, Trophy } from 'lucide-react';
 import { achievementsData } from '@/data/achievements';
@@ -105,6 +105,8 @@ export default function ProjectsTab() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [activeProject, setActiveProject] = useState<string>("");
   const [activeSubTab, setActiveSubTab] = useState<string>("3d_view");
+  const [activeHotspot, setActiveHotspot] = useState<string>("dimensions");
+  const [selectedYear, setSelectedYear] = useState<string>("2027");
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
@@ -114,15 +116,94 @@ export default function ProjectsTab() {
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  const [activeHotspot, setActiveHotspot] = useState<string>("dimensions");
+  // Helper to sync URL parameters with browser history
+  const syncUrl = (updates: { project?: string; sub?: string; year?: string; spec?: string; category?: string }, push: boolean = true) => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", "projects");
+    if (updates.project !== undefined) {
+      if (updates.project) url.searchParams.set("project", updates.project);
+      else {
+        url.searchParams.delete("project");
+        url.searchParams.delete("sub");
+        url.searchParams.delete("year");
+        url.searchParams.delete("spec");
+      }
+    }
+    if (updates.sub !== undefined) {
+      if (updates.sub) url.searchParams.set("sub", updates.sub);
+      else url.searchParams.delete("sub");
+    }
+    if (updates.year !== undefined) {
+      if (updates.year) url.searchParams.set("year", updates.year);
+      else url.searchParams.delete("year");
+    }
+    if (updates.spec !== undefined) {
+      if (updates.spec) url.searchParams.set("spec", updates.spec);
+      else url.searchParams.delete("spec");
+    }
+    if (updates.category !== undefined) {
+      if (updates.category && updates.category !== "All") url.searchParams.set("category", updates.category);
+      else url.searchParams.delete("category");
+    }
+    if (push) {
+      window.history.pushState({ ...updates }, "", url.toString());
+    } else {
+      window.history.replaceState({ ...updates }, "", url.toString());
+    }
+  };
+
+  // Initialize from deep-link query parameters
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const proj = params.get("project");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (proj === "baja" || proj === "achievements") setActiveProject(proj);
+    const sub = params.get("sub");
+    if (sub && ["3d_view", "overview", "cvt"].includes(sub)) setActiveSubTab(sub);
+    const yr = params.get("year");
+    if (yr && ["2025", "2026", "2027"].includes(yr)) setSelectedYear(yr);
+    const sp = params.get("spec");
+    if (sp && Object.keys(specHotspots).includes(sp)) setActiveHotspot(sp);
+    const cat = params.get("category");
+    if (cat && ["All", "Active", "Research", "Achievements"].includes(cat)) setSelectedCategory(cat);
+  }, []);
+
+  // Listen to browser Back/Forward (popstate) to step back without exiting the site
+  useEffect(() => {
+    const handlePop = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") !== "projects") return;
+      const proj = params.get("project") || "";
+      setActiveProject(proj);
+      const sub = params.get("sub");
+      if (sub && ["3d_view", "overview", "cvt"].includes(sub)) setActiveSubTab(sub);
+      const yr = params.get("year");
+      if (yr && ["2025", "2026", "2027"].includes(yr)) setSelectedYear(yr);
+      const sp = params.get("spec");
+      if (sp && Object.keys(specHotspots).includes(sp)) setActiveHotspot(sp);
+      const cat = params.get("category");
+      if (cat && ["All", "Active", "Research", "Achievements"].includes(cat)) setSelectedCategory(cat);
+    };
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
+
+  const handleBackToAllProjects = () => {
+    if (typeof window !== "undefined" && window.history.state?.project) {
+      window.history.back();
+    } else {
+      setActiveProject("");
+      syncUrl({ project: "" }, false);
+    }
+  };
 
   // Official JIT CVT + 9:1 Custom Gearbox Parameters
   const [cvtEngineRpm, setCvtEngineRpm] = useState<number>(3600);
   const [cvtRatio, setCvtRatio] = useState<number>(0.50); // 0.50 final overdrive to 3.90 underdrive
   const [cvtFinalDrive, setCvtFinalDrive] = useState<number>(9.0); // 9:1 Custom Gearbox
   const [cvtTireDiameter, setCvtTireDiameter] = useState<number>(23.0); // 23x7-10 tyres
-
-  const [selectedYear, setSelectedYear] = useState<string>("2026");
 
   const lowerPoint = [...dynoData].reverse().find(p => p.rpm <= cvtEngineRpm) || dynoData[0];
   const upperPoint = dynoData.find(p => p.rpm >= cvtEngineRpm) || dynoData[dynoData.length - 1];
@@ -189,13 +270,13 @@ export default function ProjectsTab() {
                   </div>
                   <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
                     <button
-                      onClick={() => { setActiveProject("achievements"); setSelectedYear("2026"); }}
+                      onClick={() => { setActiveProject("achievements"); setSelectedYear("2027"); syncUrl({ project: "achievements", year: "2027" }, true); }}
                       className="btn-gloss inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white cursor-pointer"
                     >
                       View Virtual Scores <ArrowUpRight size={15} />
                     </button>
                     <button
-                      onClick={() => { setActiveProject("baja"); setActiveSubTab("overview"); }}
+                      onClick={() => { setActiveProject("baja"); setActiveSubTab("overview"); syncUrl({ project: "baja", sub: "overview" }, true); }}
                       className="btn-glass inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm text-bone cursor-pointer"
                     >
                       Explore B-26 Specs
@@ -208,7 +289,7 @@ export default function ProjectsTab() {
             <Segmented
               id="proj-cat"
               value={selectedCategory}
-              onChange={(k) => setSelectedCategory(k)}
+              onChange={(k) => { setSelectedCategory(k); syncUrl({ category: k }, false); }}
               options={["All", "Active", "Research", "Achievements"].map((c) => ({ key: c, label: c }))}
             />
 
@@ -218,7 +299,7 @@ export default function ProjectsTab() {
                 <Reveal className="md:col-span-2 lg:col-span-2 lg:row-span-2">
                   <SpotCard
                     as="button"
-                    onClick={() => { setActiveProject("baja"); setActiveSubTab("3d_view"); }}
+                    onClick={() => { setActiveProject("baja"); setActiveSubTab("3d_view"); syncUrl({ project: "baja", sub: "3d_view" }, true); }}
                     className="group w-full h-full min-h-[420px] lg:min-h-[560px] flex flex-col justify-end p-0"
                   >
                     <Image src="/media/workshop-frame.webp" alt="Team members building the B-26 roll-cage mock-up in the workshop" fill sizes="(min-width:1024px) 66vw, 100vw" className="object-cover opacity-70 transition-transform duration-[1.6s] group-hover:scale-[1.05]" />
@@ -264,7 +345,7 @@ export default function ProjectsTab() {
                 <Reveal delay={0.1}>
                   <SpotCard
                     as="button"
-                    onClick={() => { setActiveProject("achievements"); setSelectedYear("2026"); }}
+                    onClick={() => { setActiveProject("achievements"); setSelectedYear("2027"); syncUrl({ project: "achievements", year: "2027" }, true); }}
                     className="group w-full h-full p-6 sm:p-7 flex flex-col"
                   >
                     <div className="flex items-center justify-between">
@@ -273,7 +354,7 @@ export default function ProjectsTab() {
                     </div>
                     <h2 className="mt-4 font-display font-semibold text-bone text-2xl tracking-[-0.035em] leading-[1.05]">Road to the <span className="font-serif-i gloss-red">debut.</span></h2>
                     <div className="mt-6 space-y-3 flex-1">
-                      {(achievementsData["2026"].scores ?? []).map((sc) => (
+                      {(achievementsData["2027"].scores ?? []).map((sc) => (
                         <div key={sc.label}>
                           <div className="flex justify-between text-[12px] text-bone/55"><span>{sc.label}</span><span className="tabular-nums text-bone/80">{sc.scored}/{sc.max}</span></div>
                           <div className="mt-1.5 h-[3px] rounded-full bg-white/[0.07] overflow-hidden">
@@ -291,7 +372,7 @@ export default function ProjectsTab() {
         ) : activeProject === "baja" ? (
           /* ── DETAIL: B-26 engineering report ─────────────────────── */
           <div className="space-y-10 animate-fadeIn">
-            <BackButton onClick={() => setActiveProject("")}>All projects</BackButton>
+            <BackButton onClick={handleBackToAllProjects}>All projects</BackButton>
             <SectionHead
               n="B-26"
               kicker="Design Specification Sheet"
@@ -300,7 +381,7 @@ export default function ProjectsTab() {
                 <Segmented
                   id="proj-sub"
                   value={activeSubTab}
-                  onChange={(k) => setActiveSubTab(k)}
+                  onChange={(k) => { setActiveSubTab(k); syncUrl({ sub: k }, false); }}
                   options={[
                     { key: "3d_view", label: "3D showcase", short: "3D" },
                     { key: "overview", label: "Subsystems", short: "Specs" },
@@ -348,8 +429,8 @@ export default function ProjectsTab() {
                     return (
                       <button
                         key={key}
-                        onMouseEnter={() => setActiveHotspot(key)}
-                        onClick={() => setActiveHotspot(key)}
+                        onMouseEnter={() => { setActiveHotspot(key); syncUrl({ spec: key }, false); }}
+                        onClick={() => { setActiveHotspot(key); syncUrl({ spec: key }, false); }}
                         className={`shrink-0 lg:w-full flex items-center gap-4 rounded-2xl border px-5 py-4 text-left transition-all cursor-pointer ${
                           on ? "bg-apex-red/[0.12] border-apex-red/50 text-bone shadow-[0_10px_40px_-15px_rgba(225,6,0,0.7)]" : "bg-white/[0.025] border-white/[0.08] text-bone/55 hover:text-bone hover:border-white/20"
                         }`}
@@ -363,7 +444,7 @@ export default function ProjectsTab() {
                 <div key={activeHotspot} className="lg:col-span-8 glass p-6 sm:p-8 animate-fadeIn">
                   <div className="flex items-baseline justify-between gap-4 pb-5 border-b border-white/[0.07]">
                     <div>
-                      <h3 className="font-display font-semibold text-bone text-2xl sm:text-3xl tracking-[-0.04em]">{currentSpec.title}</h3>
+                      <h3 className="font-display font-semibold text-white text-2xl sm:text-3xl tracking-[-0.04em]">{currentSpec.title}</h3>
                       <p className="mt-1 font-mono text-xs text-[#FF5A3C]">BAJA SAEINDIA 2027 Official Design Specification</p>
                     </div>
                     <Label className="hidden sm:inline">Tap value to copy</Label>
@@ -376,8 +457,8 @@ export default function ProjectsTab() {
                         className="group flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 sm:gap-6 py-4 cursor-pointer select-none"
                         title="Copy value"
                       >
-                        <dt><Label>{st.label}</Label></dt>
-                        <dd className="text-bone text-[15px] sm:text-right group-hover:text-[#FF5A3C] transition-colors">
+                        <dt><Label className="text-bone/80 text-xs font-semibold">{st.label}</Label></dt>
+                        <dd className="text-white font-medium text-[15px] sm:text-right group-hover:text-[#FF5A3C] transition-colors">
                           {st.val}
                           <span className={`ml-2 font-mono text-[9px] uppercase tracking-[0.2em] transition-opacity ${copiedIndex === idx ? "text-[#FF5A3C] opacity-100" : "text-bone/35 opacity-0 group-hover:opacity-100"}`}>
                             {copiedIndex === idx ? "Copied" : "Copy"}
@@ -440,7 +521,7 @@ export default function ProjectsTab() {
         ) : (
           /* ── DETAIL: scoreboard ─────────────────────────────────── */
           <div className="space-y-10 animate-fadeIn">
-            <BackButton onClick={() => setActiveProject("")}>All projects</BackButton>
+            <BackButton onClick={handleBackToAllProjects}>All projects</BackButton>
             <SectionHead n="25→27" kicker="Timeline & Milestones" title="Road to the *debut.*" />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -452,7 +533,7 @@ export default function ProjectsTab() {
                   return (
                     <button
                       key={year}
-                      onClick={() => setSelectedYear(year)}
+                      onClick={() => { setSelectedYear(year); syncUrl({ year }, false); }}
                       className={`shrink-0 w-[220px] lg:w-full rounded-2xl border px-5 py-4 text-left transition-all cursor-pointer ${
                         on ? "bg-apex-red/[0.12] border-apex-red/50 shadow-[0_10px_40px_-15px_rgba(225,6,0,0.7)]" : "bg-white/[0.025] border-white/[0.08] hover:border-white/20"
                       }`}

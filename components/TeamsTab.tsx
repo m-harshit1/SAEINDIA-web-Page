@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Award, Search, ShieldCheck, UserCheck } from 'lucide-react';
 import {
   facultyAdvisors, officeBearers, bajaTeam, TeamMember
@@ -87,6 +87,41 @@ export default function TeamsTab() {
   const [officerFilter, setOfficerFilter] = useState<OfficerFilter>("all");
   const [memberSearch, setMemberSearch] = useState<string>("");
 
+  // Initialize from deep-link query parameters (?tab=teams&section=...)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const sec = params.get("section") as Segment | null;
+    if (sec && ["officers", "baja", "chapter", "alumni"].includes(sec)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveSegment(sec);
+    }
+  }, []);
+
+  // Listen to browser Back/Forward (popstate) to step back without exiting the site
+  useEffect(() => {
+    const handlePop = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") !== "teams") return;
+      const sec = (params.get("section") as Segment | null) || "officers";
+      if (["officers", "baja", "chapter", "alumni"].includes(sec)) {
+        setActiveSegment(sec);
+      }
+    };
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
+
+  const handleSegmentChange = (seg: Segment) => {
+    setActiveSegment(seg);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "teams");
+      url.searchParams.set("section", seg);
+      window.history.pushState({ tab: "teams", section: seg }, "", url.toString());
+    }
+  };
+
   const getFilteredBaja = () => {
     switch (bajaFilter) {
       case "leads": return bajaTeam.filter(m => m.isLead);
@@ -138,7 +173,7 @@ export default function TeamsTab() {
         <Segmented
           id="team-seg"
           value={activeSegment}
-          onChange={setActiveSegment}
+          onChange={handleSegmentChange}
           options={[
             { key: "officers", label: "Office Bearers (2025–26)", short: "Officers" },
             { key: "baja", label: "Current BAJA Team (2026–27)", short: "BAJA Team" },
@@ -537,7 +572,7 @@ export default function TeamsTab() {
               <p className="mt-6 max-w-xl text-bone/65 text-base sm:text-lg leading-relaxed">
                 The chapter was chartered in 2025. Our first cohorts are currently designing and manufacturing the B-26 all-terrain vehicle — the inaugural alumni graduate in 2027–28.
               </p>
-              <button onClick={() => setActiveSegment("baja")} className="btn-gloss mt-9 inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white cursor-pointer">
+              <button onClick={() => handleSegmentChange("baja")} className="btn-gloss mt-9 inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white cursor-pointer">
                 Meet the BAJA crew →
               </button>
             </Reveal>
