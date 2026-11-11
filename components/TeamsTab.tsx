@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Award, Search, ShieldCheck, UserCheck } from 'lucide-react';
 import {
   facultyAdvisors, officeBearers, bajaTeam, TeamMember
@@ -86,6 +86,7 @@ export default function TeamsTab() {
   const [bajaFilter, setBajaFilter] = useState<BajaFilter>("all");
   const [officerFilter, setOfficerFilter] = useState<OfficerFilter>("all");
   const [memberSearch, setMemberSearch] = useState<string>("");
+  const segContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize from deep-link query parameters (?tab=teams&section=...)
   useEffect(() => {
@@ -119,6 +120,18 @@ export default function TeamsTab() {
       url.searchParams.set("tab", "teams");
       url.searchParams.set("section", seg);
       window.history.pushState({ tab: "teams", section: seg }, "", url.toString());
+
+      // Anchor scroll so user is never thrown down to the bottom
+      if (segContainerRef.current) {
+        const segTop = segContainerRef.current.getBoundingClientRect().top + window.scrollY - 70;
+        if (window.scrollY > segTop) {
+          if (window.__lenis) {
+            window.__lenis.scrollTo(segTop, { immediate: true });
+          } else {
+            window.scrollTo({ top: segTop, behavior: "instant" });
+          }
+        }
+      }
     }
   };
 
@@ -168,19 +181,27 @@ export default function TeamsTab() {
         ]}
       />
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-10 pb-24 space-y-16">
-        {/* Segmented Control with Office Bearers FIRST */}
-        <Segmented
-          id="team-seg"
-          value={activeSegment}
-          onChange={handleSegmentChange}
-          options={[
-            { key: "officers", label: "Office Bearers (2025–26)", short: "Officers" },
-            { key: "baja", label: "Current BAJA Team (2026–27)", short: "BAJA Team" },
-            { key: "chapter", label: "Collegiate Members (77)", short: "Members" },
-            { key: "alumni", label: "Alumni Network", short: "Alumni" },
-          ]}
-        />
+      {/* Sticky Segmented Switcher: stays pinned at top under the navigation header */}
+      <div
+        ref={segContainerRef}
+        className="sticky top-[68px] z-30 bg-[#0a0a0c]/90 backdrop-blur-xl border-y border-white/[0.08] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8)]"
+      >
+        <div className="max-w-7xl mx-auto px-5 sm:px-10 py-3.5 flex items-center justify-between">
+          <Segmented
+            id="team-seg"
+            value={activeSegment}
+            onChange={handleSegmentChange}
+            options={[
+              { key: "officers", label: "Office Bearers (2025–26)", short: "Officers" },
+              { key: "baja", label: "Current BAJA Team (2026–27)", short: "BAJA Team" },
+              { key: "chapter", label: "Collegiate Members (77)", short: "Members" },
+              { key: "alumni", label: "Alumni Network", short: "Alumni" },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-5 sm:px-10 pt-10 pb-24 space-y-16">
 
         {/* ══ 1. OFFICE BEARERS & ADVISORY (FIRST SECTION) ══════════════ */}
         {activeSegment === "officers" && (

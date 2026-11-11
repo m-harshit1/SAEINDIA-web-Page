@@ -160,13 +160,13 @@ export function SectionHead({
 
 export interface SegOption<K extends string> { key: K; label: string; short?: string }
 
-/** Glass pill switcher; the active pill is glossy red and glides between options. */
+/** Glass pill switcher with stable, glitch-free active styling. */
 export function Segmented<K extends string>({
   id, options, value, onChange, className = "",
 }: { id: string; options: SegOption<K>[]; value: K; onChange: (k: K) => void; className?: string }) {
   return (
-    <div role="tablist" className={`max-w-full overflow-x-auto no-scrollbar ${className}`}>
-      <div className="glass !rounded-full inline-flex p-1 gap-0.5">
+    <div role="tablist" aria-label={id} className={`max-w-full overflow-x-auto no-scrollbar ${className}`}>
+      <div className="glass !rounded-full inline-flex p-1 gap-1">
         {options.map((o) => {
           const on = o.key === value;
           return (
@@ -175,10 +175,13 @@ export function Segmented<K extends string>({
               role="tab"
               aria-selected={on}
               onClick={() => onChange(o.key)}
-              className={`relative shrink-0 whitespace-nowrap rounded-full px-4 sm:px-5 py-2.5 text-[13px] sm:text-sm font-medium transition-colors cursor-pointer ${on ? "text-white" : "text-bone/55 hover:text-bone"}`}
+              className={`relative shrink-0 whitespace-nowrap rounded-full px-4 sm:px-5 py-2.5 text-[13px] sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
+                on
+                  ? "btn-gloss text-white shadow-lg shadow-apex-red/35 scale-[1.01]"
+                  : "text-bone/60 hover:text-bone hover:bg-white/[0.04]"
+              }`}
             >
-              {on && <motion.span layoutId={`seg-${id}`} className="btn-gloss absolute inset-0 rounded-full" transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
-              <span className="relative">
+              <span className="relative z-10">
                 {o.short ? <><span className="sm:hidden">{o.short}</span><span className="hidden sm:inline">{o.label}</span></> : o.label}
               </span>
             </button>

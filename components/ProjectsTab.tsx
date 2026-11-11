@@ -566,7 +566,7 @@ export default function ProjectsTab() {
                 {currentAchievement.scores && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
                     <Label className="sm:col-span-2 text-[#FF5A3C]/80">
-                      {currentAchievement.year === "2026" ? "Official Virtual Round Score Breakdown" : "Target points — not results yet"}
+                      {currentAchievement.year === "2027" ? "Official Virtual Round Score Breakdown & Targets" : "Target points — not results yet"}
                     </Label>
                     {currentAchievement.scores.map((sc) => {
                       const pct = (sc.scored / sc.max) * 100;
